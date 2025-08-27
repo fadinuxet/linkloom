@@ -1109,13 +1109,18 @@
         document.getElementById('status').classList.add('hidden');
         document.getElementById('alreadyConnected').classList.remove('hidden');
         
+        // Debug: Log connection data
+        const connection = JSON.parse(localStorage.getItem('linkloom-connection') || '{}');
+        console.log('🔍 DEBUG - Connection data when showing already connected:', connection);
+        console.log('🔍 DEBUG - List connections count:', connection.listConnections?.length || 0);
+        
         // Show connection details
         updateConnectionDetails();
         
         // Populate list connections
         populateListConnections();
         
-                // Try to refresh real lists if we have a token
+        // Try to refresh real lists if we have a token
         refreshRealListsIfPossible();
       }
       
@@ -1342,12 +1347,17 @@
         const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
         if (!connection) return;
         
+        console.log('🔍 DEBUG - populateListConnections called with:', connection);
+        console.log('🔍 DEBUG - listConnections array:', connection.listConnections);
+        
         const listConnectionsContainer = document.getElementById('listConnections');
         if (!listConnectionsContainer) return;
         
         // Handle both old single-list and new multiple-list formats
         const listConnections = connection.listConnections || [];
         const isMultipleLists = listConnections.length > 0;
+        
+        console.log('🔍 DEBUG - isMultipleLists:', isMultipleLists, 'count:', listConnections.length);
         
         if (isMultipleLists) {
           // Show multiple list connections
@@ -1364,6 +1374,8 @@
               </div>
             </div>
           `).join('');
+          
+          console.log('🔍 DEBUG - Multiple lists HTML generated for:', listConnections.length, 'lists');
         } else {
           // Show single list connection (old format)
           listConnectionsContainer.innerHTML = `
@@ -1374,6 +1386,8 @@
               </div>
             </div>
           `;
+          
+          console.log('🔍 DEBUG - Single list HTML generated');
         }
         
         // Populate the add list dropdown with available lists
