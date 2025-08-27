@@ -115,7 +115,7 @@ serve(async (req) => {
         const { data: existingCards, error: fetchError } = await supabaseClient
           .from('links')
           .select('trello_card_id, title')
-          .eq('metadata->trello_list_id', list_id)
+          .eq('metadata->>trello_list_id', list_id)
           .eq('user_id', user_id)
         
         if (fetchError) {
