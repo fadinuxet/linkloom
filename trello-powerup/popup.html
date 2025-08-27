@@ -297,16 +297,8 @@
           <button class="btn" onclick="syncAgain()" style="width: 100%; background: #28a745; margin-bottom: 10px;">
             🔄 Sync Now
           </button>
-          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <button class="btn" onclick="disconnectAndReconnect()" style="flex: 1; background: #ffc107; color: #000; font-size: 12px;">
-              🔒 Hide Connection
-            </button>
-            <button class="btn" onclick="resetConnection()" style="flex: 1; background: #dc3545; font-size: 12px;">
-              🗑️ Reset All
-            </button>
-          </div>
-          <button class="btn" onclick="reconnectToPrevious()" style="width: 100%; background: #17a2b8; font-size: 12px;">
-            🔗 Reconnect to Previous
+          <button class="btn" onclick="disconnectAndReconnect()" style="width: 100%; background: #dc3545;">
+            Disconnect
           </button>
         </div>
       </div>
@@ -1230,11 +1222,33 @@
           document.getElementById('connectionForm').classList.remove('hidden');
           document.getElementById('status').classList.remove('hidden');
           
-          // Show reconnection option
-          showStatus('Connection hidden. Click "Reconnect" to restore your setup.', 'info');
+          // Show reconnection message
+          showStatus('Connection hidden. Your lists are preserved. Connect again to restore.', 'info');
           
         } catch (error) {
           console.error('Error hiding connection:', error);
+        }
+      }
+      
+      function handleReconnection() {
+        try {
+          const connectionData = localStorage.getItem('linkloom-connection');
+          if (connectionData) {
+            const connection = JSON.parse(connectionData);
+            console.log('🔄 Reconnecting with previous data:', connection);
+            
+            // Restore previous connection
+            showAlreadyConnected();
+            
+            // Show success message
+            showStatus('Previous connection restored! All your lists are back.', 'success');
+          } else {
+            console.log('❌ No previous connection to restore');
+            showStatus('No previous connection found. Please connect manually.', 'error');
+          }
+        } catch (error) {
+          console.error('Error during reconnection:', error);
+          showStatus('Failed to restore connection. Please connect manually.', 'error');
         }
       }
       
