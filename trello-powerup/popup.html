@@ -280,9 +280,17 @@
           <div id="listConnections" style="margin: 10px 0;">
             <!-- List connections will be populated here -->
           </div>
-          <button class="btn" onclick="addListConnection()" style="width: 100%; background: #17a2b8; margin-bottom: 10px;">
-            ➕ Add Another List
-          </button>
+          
+          <!-- List Selection for Adding New Lists -->
+          <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+            <h5 style="margin: 0 0 10px 0; color: #333; font-size: 13px;">➕ Add New List Connection</h5>
+            <select id="addListSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; font-size: 12px;">
+              <option value="">Select a list to add...</option>
+            </select>
+            <button class="btn" onclick="addListConnection()" style="width: 100%; background: #17a2b8; font-size: 12px;">
+              ➕ Add Selected List
+            </button>
+          </div>
         </div>
         
         <div style="padding: 0 14px 14px;">
@@ -1128,15 +1136,45 @@
             </div>
           `;
         }
+        
+        // Populate the add list dropdown with available lists
+        populateAddListDropdown();
+      }
+      
+      function populateAddListDropdown() {
+        const addListSelect = document.getElementById('addListSelect');
+        if (!addListSelect) return;
+        
+        // Get current connection to see which lists are already connected
+        const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
+        const connectedListIds = connection?.listConnections?.map(conn => conn.listId) || [];
+        
+        // Clear existing options
+        addListSelect.innerHTML = '<option value="">Select a list to add...</option>';
+        
+        // Add available lists (excluding already connected ones)
+        workingLists.forEach(list => {
+          if (!connectedListIds.includes(list.id)) {
+            const option = document.createElement('option');
+            option.value = list.id;
+            option.textContent = list.name;
+            addListSelect.appendChild(option);
+          }
+        });
+        
+        // If no lists available, show message
+        if (addListSelect.options.length === 1) {
+          addListSelect.innerHTML = '<option value="">All lists already connected</option>';
+        }
       }
       
       function addListConnection() {
-        // Show a modal or form to select another list
-        const listSelect = document.getElementById('syncList');
+        // Use the new dropdown for adding lists
+        const listSelect = document.getElementById('addListSelect');
         const selectedListId = listSelect.value;
         const selectedList = workingLists.find(list => list.id === selectedListId);
         
-        if (!selectedList) {
+        if (!selectedListId || !selectedList) {
           showStatus('Please select a list first', 'error');
           return;
         }
@@ -1183,6 +1221,7 @@
         // Update UI
         updateConnectionDetails();
         populateListConnections();
+        populateAddListDropdown(); // Refresh the dropdown
         showStatus('List connection removed', 'success');
       }
       
