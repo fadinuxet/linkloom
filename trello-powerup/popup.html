@@ -273,6 +273,18 @@
             <span id="connectionInfo">Loading...</span>
           </p>
         </div>
+        
+        <!-- Multiple List Management -->
+        <div id="listManagement" style="padding: 0 14px; margin-bottom: 15px;">
+          <h4 style="margin: 10px 0; color: #333; font-size: 14px;">📋 List Management</h4>
+          <div id="listConnections" style="margin: 10px 0;">
+            <!-- List connections will be populated here -->
+          </div>
+          <button class="btn" onclick="addListConnection()" style="width: 100%; background: #17a2b8; margin-bottom: 10px;">
+            ➕ Add Another List
+          </button>
+        </div>
+        
         <div style="padding: 0 14px 14px;">
           <button class="btn" onclick="syncAgain()" style="width: 100%; background: #28a745; margin-bottom: 10px;">
             🔄 Sync Now
@@ -599,54 +611,72 @@
             syncBtn.disabled = true;
           }
           
-          // Send sync request to backend
-          const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-ultimate-test`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${window.LINKLOOM_CONFIG.SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-              user_id: connection.user_id || 'test-user',
-              board_id: currentBoard.id,
-              list_id: connection.listId,
-              sync_rule: connection.syncRule || 'latest',
-              board_name: currentBoard.name,
-              list_name: connection.listName,
-              linkloom_url: connection.linkloomUrl,
-              card_limit: connection.cardLimit || 10,
-              trello_token: connection.trelloToken,
-              trello_api_key: window.LINKLOOM_CONFIG.TRELLO_API_KEY
-            })
-          });
+          // Sync all active list connections
+          let totalCardsSynced = 0;
+          let totalListsSynced = 0;
           
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.log('🔍 Detailed error response:', errorData);
-            
-            // Build detailed error message
-            let errorMessage = `Sync failed: ${response.status} - ${errorData.error || 'Unknown error'}`;
-            
-            if (errorData.trello_error) {
-              errorMessage += `\nTrello Error: ${errorData.trello_error}`;
+          for (const listConnection of connection.listConnections || []) {
+            if (listConnection.isActive) {
+              console.log(`🔄 Syncing list: ${listConnection.listName} (${listConnection.listId})`);
+              
+              // Send sync request for this specific list
+              const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-ultimate-test`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${window.LINKLOOM_CONFIG.SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                  user_id: connection.user_id || 'test-user',
+                  board_id: currentBoard.id,
+                  list_id: listConnection.listId,
+                  sync_rule: connection.syncRule || 'latest',
+                  board_name: currentBoard.name,
+                  list_name: listConnection.listName,
+                  linkloom_url: connection.linkloomUrl,
+                  card_limit: connection.cardLimit || 10,
+                  trello_token: connection.trelloToken,
+                  trello_api_key: window.LINKLOOM_CONFIG.TRELLO_API_KEY
+                })
+              });
+              
+              if (!response.ok) {
+                const errorData = await response.json();
+                console.log('🔍 Detailed error response:', errorData);
+                
+                // Build detailed error message
+                let errorMessage = `Sync failed for list ${listConnection.listName}: ${response.status} - ${errorData.error || 'Unknown error'}`;
+                
+                if (errorData.trello_error) {
+                  errorMessage += `\nTrello Error: ${errorData.trello_error}`;
+                }
+                if (errorData.status) {
+                  errorMessage += `\nStatus: ${errorData.status}`;
+                }
+                if (errorData.list_id) {
+                  errorMessage += `\nList ID: ${errorData.list_id}`;
+                }
+                if (errorData.trello_url) {
+                  errorMessage += `\nTrello URL: ${errorData.trello_url}`;
+                }
+                
+                throw new Error(errorMessage);
+              }
+              
+              const result = await response.json();
+              console.log(`✅ List ${listConnection.listName} synced:`, result);
+              
+              totalCardsSynced += result.trello_cards_count || 0;
+              totalListsSynced++;
             }
-            if (errorData.status) {
-              errorMessage += `\nStatus: ${errorData.status}`;
-            }
-            if (errorData.list_id) {
-              errorMessage += `\nList ID: ${errorData.list_id}`;
-            }
-            if (errorData.trello_url) {
-              errorMessage += `\nTrello URL: ${errorData.trello_url}`;
-            }
-            
-            throw new Error(errorMessage);
           }
           
-          const result = await response.json();
-          console.log('✅ Re-sync successful:', result);
+          if (totalListsSynced === 0) {
+            throw new Error('No active list connections found to sync');
+          }
           
-          showStatus(`✅ Re-sync successful! ${result.synced_cards} cards synced.`, 'success');
+          // Show success message for multiple lists
+          showStatus(`✅ Re-sync successful! ${totalCardsSynced} cards synced from ${totalListsSynced} lists.`, 'success');
           
           // Update connection details
           updateConnectionDetails();
@@ -691,19 +721,24 @@
           const connectionData = {
             boardId: currentBoard.id,
             boardName: currentBoard.name,
-            listId: listId,
-            listName: currentList.name,
+            listConnections: [], // Array to store multiple list connections
             linkloomUrl: linkloomUrl,
             syncRule: syncRule,
             cardLimit: parseInt(cardLimit),
             connectedAt: new Date().toISOString()
           };
           
+          // Add the first list connection
+          connectionData.listConnections.push({
+            listId: listId,
+            listName: currentList.name,
+            isActive: true
+          });
+          
           console.log('🔗 Connection data prepared:', {
             boardId: connectionData.boardId,
             boardName: connectionData.boardName,
-            listId: connectionData.listId,
-            listName: connectionData.listName
+            listConnections: connectionData.listConnections
           });
 
           // Store connection data locally
@@ -843,9 +878,23 @@
           const connection = JSON.parse(connectionData);
           const connectionInfo = document.getElementById('connectionInfo');
           if (connectionInfo) {
+            // Handle both old single-list and new multiple-list formats
+            const listConnections = connection.listConnections || [];
+            const isMultipleLists = listConnections.length > 0;
+            
+            let listsHtml = '';
+            if (isMultipleLists) {
+              listsHtml = `
+                • Lists: ${listConnections.map(conn => `${conn.listName}${conn.isActive ? ' (Active)' : ' (Inactive)'}`).join(', ')}<br>
+              `;
+            } else {
+              // Fallback for old single-list format
+              listsHtml = `• List: ${connection.listName}<br>`;
+            }
+            
             connectionInfo.innerHTML = `
               • Board: ${connection.boardName || currentBoard?.name}<br>
-              • List: ${connection.listName}<br>
+              ${listsHtml}
               • Sync Rule: ${connection.syncRule}<br>
               • Last Synced: ${new Date().toLocaleString()}<br>
               • Card Limit: ${connection.cardLimit || 10}
@@ -968,6 +1017,9 @@
         
         // Show connection details
         updateConnectionDetails();
+        
+        // Populate list connections
+        populateListConnections();
       }
 
       function disconnectAndReconnect() {
@@ -1029,6 +1081,121 @@
         `;
       }
 
+      // Multiple list management functions
+      function populateListConnections() {
+        const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
+        if (!connection) return;
+        
+        const listConnectionsContainer = document.getElementById('listConnections');
+        if (!listConnectionsContainer) return;
+        
+        // Handle both old single-list and new multiple-list formats
+        const listConnections = connection.listConnections || [];
+        const isMultipleLists = listConnections.length > 0;
+        
+        if (isMultipleLists) {
+          // Show multiple list connections
+          listConnectionsContainer.innerHTML = listConnections.map(conn => `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px; margin: 5px 0;">
+              <span style="font-size: 12px;">${conn.listName}</span>
+              <div>
+                <button onclick="toggleListConnection('${conn.listId}')" style="margin-right: 5px; padding: 4px 8px; font-size: 11px; border: none; border-radius: 3px; background: ${conn.isActive ? '#28a745' : '#6c757d'}; color: white;">
+                  ${conn.isActive ? '🟢 Active' : '🔴 Inactive'}
+                </button>
+                <button onclick="removeListConnection('${conn.listId}')" style="padding: 4px 8px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 3px;">
+                  ❌
+                </button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          // Show single list connection (old format)
+          listConnectionsContainer.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px; margin: 5px 0;">
+              <span style="font-size: 12px;">${connection.listName || 'Unknown List'}</span>
+              <div>
+                <span style="color: #28a745; font-size: 11px;">🟢 Active</span>
+              </div>
+            </div>
+          `;
+        }
+      }
+      
+      function addListConnection() {
+        // Show a modal or form to select another list
+        const listSelect = document.getElementById('syncList');
+        const selectedListId = listSelect.value;
+        const selectedList = workingLists.find(list => list.id === selectedListId);
+        
+        if (!selectedList) {
+          showStatus('Please select a list first', 'error');
+          return;
+        }
+        
+        // Get current connection
+        const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
+        if (!connection.listConnections) {
+          connection.listConnections = [];
+        }
+        
+        // Check if list is already connected
+        const alreadyConnected = connection.listConnections.find(conn => conn.listId === selectedListId);
+        if (alreadyConnected) {
+          showStatus(`List "${selectedList.name}" is already connected`, 'error');
+          return;
+        }
+        
+        // Add new list connection
+        connection.listConnections.push({
+          listId: selectedListId,
+          listName: selectedList.name,
+          isActive: true
+        });
+        
+        // Save updated connection
+        localStorage.setItem('linkloom-connection', JSON.stringify(connection));
+        
+        // Update UI
+        updateConnectionDetails();
+        populateListConnections();
+        showStatus(`List "${selectedList.name}" added successfully`, 'success');
+      }
+      
+      function removeListConnection(listId) {
+        const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
+        if (!connection.listConnections) return;
+        
+        // Remove the list connection
+        connection.listConnections = connection.listConnections.filter(conn => conn.listId !== listId);
+        
+        // Save updated connection
+        localStorage.setItem('linkloom-connection', JSON.stringify(connection));
+        
+        // Update UI
+        updateConnectionDetails();
+        populateListConnections();
+        showStatus('List connection removed', 'success');
+      }
+      
+      function toggleListConnection(listId) {
+        const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
+        if (!connection.listConnections) return;
+        
+        // Toggle the active state
+        const listConn = connection.listConnections.find(conn => conn.listId === listId);
+        if (listConn) {
+          listConn.isActive = !listConn.isActive;
+          
+          // Save updated connection
+          localStorage.setItem('linkloom-connection', JSON.stringify(connection));
+          
+          // Update UI
+          updateConnectionDetails();
+          populateListConnections();
+          showStatus(`List "${listConn.listName}" ${listConn.isActive ? 'activated' : 'deactivated'}`, 'success');
+        }
+      }
+      
       // Test function to see if we can get data
       async function testWithMockClient() {
         try {

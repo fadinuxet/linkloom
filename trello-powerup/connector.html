@@ -64,7 +64,8 @@
         t.board('name'),
         t.lists('all')
       ]).then(function([boardId, boardName, lists]) {
-        console.log('✅ Real data fetched:', { boardId, boardName, lists });
+        console.log('✅ Real data fetched:', 
+        { boardId, boardName, lists });
         
         // Extract actual values from Trello objects
         const actualBoardId = boardId.id || boardId;
