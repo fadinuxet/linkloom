@@ -814,13 +814,22 @@
           console.log('🔑 Trello token present:', connectionData.trelloToken ? 'YES' : 'NO');
           console.log('🔑 Token value:', connectionData.trelloToken ? connectionData.trelloToken.substring(0, 20) + '...' : 'NO TOKEN');
           
+          // Get the first list connection (for initial sync)
+          const firstListConnection = connectionData.listConnections && connectionData.listConnections.length > 0 
+            ? connectionData.listConnections[0] 
+            : null;
+          
+          if (!firstListConnection) {
+            throw new Error('No list connection found in connection data');
+          }
+          
           const requestBody = {
             user_id: 'test-user', // We'll need to get this from the user's session
             board_id: connectionData.boardId,
-            list_id: connectionData.listId,
+            list_id: firstListConnection.listId, // Use the first list connection
             sync_rule: connectionData.syncRule,
             board_name: connectionData.boardName,
-            list_name: connectionData.listName,
+            list_name: firstListConnection.listName, // Use the first list connection
             linkloom_url: connectionData.linkloomUrl,
             card_limit: connectionData.cardLimit,
             trello_token: connectionData.trelloToken,
@@ -834,7 +843,7 @@
           console.log('🔍 DEBUG - SUPABASE_URL:', window.LINKLOOM_CONFIG.SUPABASE_URL);
           console.log('🔍 DEBUG - SUPABASE_ANON_KEY length:', window.LINKLOOM_CONFIG.SUPABASE_ANON_KEY?.length || 0);
           console.log('🔍 DEBUG - SUPABASE_ANON_KEY prefix:', window.LINKLOOM_CONFIG.SUPABASE_ANON_KEY?.substring(0, 20) + '...');
-          console.log('🔍 DEBUG - Full request URL:', `${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync`);
+          console.log('🔍 DEBUG - Full request URL:', `${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-ultimate-test`);
           
           // DEBUG: Log the headers being sent
           const requestHeaders = {
