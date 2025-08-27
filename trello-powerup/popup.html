@@ -695,7 +695,7 @@
               console.log(`🔄 Syncing list: ${listConnection.listName} (${listConnection.listId})`);
               
               // Send sync request for this specific list
-              const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-ultimate-test`, {
+              const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-full`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -928,7 +928,7 @@
           console.log('🔍 DEBUG - Request headers:', requestHeaders);
           
           // Call your Supabase Edge Function
-          const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-ultimate-test`, {
+          const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-full`, {
             method: 'POST',
             headers: requestHeaders,
             body: JSON.stringify(requestBody)
