@@ -703,10 +703,10 @@
                 },
                 body: JSON.stringify({
                   user_id: connection.user_id || 'test-user',
-                  board_id: currentBoard.id,
+                  board_id: connection.boardId || currentBoard.id,
                   list_id: listConnection.listId,
                   sync_rule: connection.syncRule || 'latest',
-                  board_name: currentBoard.name,
+                  board_name: connection.boardName || currentBoard.name,
                   list_name: listConnection.listName,
                   linkloom_url: connection.linkloomUrl,
                   card_limit: connection.cardLimit || 10,
@@ -1151,11 +1151,51 @@
           
           console.log('📋 Updated working lists:', workingLists);
           
+          // Update connection data with real board info if needed
+          updateConnectionWithRealData(connection, lists);
+          
           // Refresh the add list dropdown
           populateAddListDropdown();
           
         } catch (error) {
           console.error('❌ Error refreshing lists:', error);
+        }
+      }
+      
+      function updateConnectionWithRealData(connection, realLists) {
+        try {
+          // Check if we need to update the connection with real data
+          let needsUpdate = false;
+          
+          // Update board info if it's still using fallback data
+          if (connection.boardId === 'working-board' || connection.boardName === 'Your Board') {
+            connection.boardId = currentBoard.id;
+            connection.boardName = currentBoard.name;
+            needsUpdate = true;
+            console.log('🔄 Updated connection with real board data:', connection.boardId, connection.boardName);
+          }
+          
+          // Update list connections with real IDs if they're using fallback IDs
+          if (connection.listConnections && connection.listConnections.length > 0) {
+            connection.listConnections.forEach(listConn => {
+              // Find matching real list by name
+              const realList = realLists.find(real => real.name === listConn.listName);
+              if (realList && listConn.listId !== realList.id) {
+                console.log(`🔄 Updating list ID from "${listConn.listId}" to "${realList.id}" for "${listConn.listName}"`);
+                listConn.listId = realList.id;
+                needsUpdate = true;
+              }
+            });
+          }
+          
+          // Save updated connection if changes were made
+          if (needsUpdate) {
+            localStorage.setItem('linkloom-connection', JSON.stringify(connection));
+            console.log('✅ Connection data updated with real Trello data');
+          }
+          
+        } catch (error) {
+          console.error('❌ Error updating connection with real data:', error);
         }
       }
       
