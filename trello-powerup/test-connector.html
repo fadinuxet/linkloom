@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LinkLoom Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f0f0f0;
+      }
+      .test-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 2px solid #667eea;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+      .success { background: #d4edda; color: #155724; }
+      .error { background: #f8d7da; color: #721c24; }
+      .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 LinkLoom Power-Up Test</h1>
+    
+    <div class="test-box">
+      <h3>Test 1: Basic Page Load</h3>
+      <div id="basic-test" class="status info">Testing basic page functionality...</div>
+    </div>
+
+    <div class="test-box">
+      <h3>Test 2: Trello Script Load</h3>
+      <div id="trello-test" class="status info">Testing Trello script load...</div>
+    </div>
+
+    <div class="test-box">
+      <h3>Test 3: Power-Up Initialization</h3>
+      <div id="init-test" class="status info">Testing Power-Up initialization...</div>
+    </div>
+
+    <div class="test-box">
+      <h3>Debug Info</h3>
+      <div id="debug-info"></div>
+    </div>
+
+    <script>
+      // Test 1: Basic page functionality
+      document.getElementById('basic-test').innerHTML = '✅ Basic page loaded successfully';
+      document.getElementById('basic-test').className = 'status success';
+
+      // Test 2: Try to load Trello script
+      const script = document.createElement('script');
+      script.src = 'https://p.trellocdn.com/power-up.min.js';
+      script.onload = function() {
+        document.getElementById('trello-test').innerHTML = '✅ Trello script loaded successfully';
+        document.getElementById('trello-test').className = 'status success';
+        
+        // Test 3: Try to initialize Power-Up
+        try {
+          if (typeof TrelloPowerUp !== 'undefined') {
+            document.getElementById('init-test').innerHTML = '✅ TrelloPowerUp object found';
+            document.getElementById('init-test').className = 'status success';
+            
+            // Try to initialize
+            TrelloPowerUp.initialize({
+              'board-buttons': function (t, opts) {
+                return [{
+                  icon: {
+                    dark: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo=',
+                    light: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo='
+                  },
+                  text: 'LinkLoom Test',
+                  callback: function (t) {
+                    alert('Power-Up is working!');
+                  }
+                }];
+              }
+            });
+            
+            document.getElementById('init-test').innerHTML = '✅ Power-Up initialized successfully!';
+            document.getElementById('init-test').className = 'status success';
+          } else {
+            document.getElementById('init-test').innerHTML = '❌ TrelloPowerUp object not found';
+            document.getElementById('init-test').className = 'status error';
+          }
+        } catch (error) {
+          document.getElementById('init-test').innerHTML = '❌ Error initializing: ' + error.message;
+          document.getElementById('init-test').className = 'status error';
+        }
+      };
+      
+      script.onerror = function() {
+        document.getElementById('trello-test').innerHTML = '❌ Failed to load Trello script';
+        document.getElementById('trello-test').className = 'status error';
+      };
+      
+      document.head.appendChild(script);
+
+      // Debug info
+      document.getElementById('debug-info').innerHTML = `
+        <strong>User Agent:</strong> ${navigator.userAgent}<br>
+        <strong>Page URL:</strong> ${window.location.href}<br>
+        <strong>Timestamp:</strong> ${new Date().toISOString()}<br>
+        <strong>Scripts Loaded:</strong> ${document.scripts.length}
+      `;
+    </script>
+  </body>
+</html>

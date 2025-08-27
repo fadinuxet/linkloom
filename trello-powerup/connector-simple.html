@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LinkLoom Trello Power-Up</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f8f9fa;
+        margin: 0;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .status {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e1e5e9;
+        margin: 20px 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">L</div>
+      <h1>LinkLoom Trello Power-Up</h1>
+      <p>Connecting your Trello content to your bio page...</p>
+    </div>
+
+    <div id="status" class="status">
+      <h3>Power-Up Status</h3>
+      <div id="status-text">Loading...</div>
+    </div>
+
+    <script>
+      // Simple status display
+      document.getElementById('status-text').innerHTML = '✅ Page loaded successfully';
+      
+      // Load Trello script
+      const script = document.createElement('script');
+      script.src = 'https://p.trellocdn.com/power-up.min.js';
+      
+      script.onload = function() {
+        document.getElementById('status-text').innerHTML = '✅ Trello script loaded successfully';
+        
+        // Wait a moment for script to initialize
+        setTimeout(() => {
+          if (typeof TrelloPowerUp !== 'undefined') {
+            document.getElementById('status-text').innerHTML = '✅ Power-Up ready! This connector is working.';
+            
+            // Initialize the Power-Up
+            TrelloPowerUp.initialize({
+              'board-buttons': function (t, opts) {
+                return [{
+                  icon: {
+                    dark: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo=',
+                    light: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo='
+                  },
+                  text: 'LinkLoom',
+                  callback: function (t) {
+                    return t.popup({
+                      title: 'Connect to LinkLoom',
+                      url: './popup.html',
+                      height: 500
+                    });
+                  }
+                }];
+              }
+            });
+            
+          } else {
+            document.getElementById('status-text').innerHTML = '❌ TrelloPowerUp not available';
+          }
+        }, 1000);
+        
+      };
+      
+      script.onerror = function() {
+        document.getElementById('status-text').innerHTML = '❌ Failed to load Trello script';
+      };
+      
+      document.head.appendChild(script);
+    </script>
+  </body>
+</html>

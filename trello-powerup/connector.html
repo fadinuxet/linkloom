@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LinkLoom Power-Up</title>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+      .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+      .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+      .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+      .loading { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+  </head>
+  <body>
+    <h2>LinkLoom Power-Up</h2>
+    <div id="status" class="status loading">Initializing...</div>
+    
+    <script>
+      console.log('LinkLoom Power-Up starting...');
+
+      function updateStatus(message, type) {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = `status ${type}`;
+        console.log('Status:', message);
+      }
+
+      function initializePowerUp() {
+        try {
+          console.log('Initializing Power-Up...');
+
+          // Initialize Power-Up
+          TrelloPowerUp.initialize({
+            'board-buttons': function(t, options) {
+  console.log('🏢 Board buttons called - getting real board data...');
+  
+  return [{
+    icon: {
+      dark: 'https://dapper-eclair-8ecd0e.netlify.app/icon.png',
+      light: 'https://dapper-eclair-8ecd0e.netlify.app/icon.png'
+    },
+    text: 'LinkLoom',
+    callback: function(t) {
+      console.log('🔗 LinkLoom button clicked');
+      console.log('📡 Fetching real Trello data...');
+      
+      // SIMPLE APPROACH: Open popup immediately, then fetch data
+      console.log('📡 Opening popup immediately (SIMPLE APPROACH)...');
+      
+      // Open popup FIRST to preserve Trello context
+      const popup = t.popup({
+        title: 'LinkLoom - Connect Your Trello Board',
+        url: 'https://dapper-eclair-8ecd0e.netlify.app/popup.html',
+        height: 600,
+        args: { position: 'right' }
+      });
+      
+      // NOW fetch data (after popup is open)
+      console.log('📡 Fetching real Trello data after popup opened...');
+      
+      Promise.all([
+        t.board('id'),
+        t.board('name'),
+        t.lists('all')
+      ]).then(function([boardId, boardName, lists]) {
+        console.log('✅ Real data fetched:', { boardId, boardName, lists });
+        
+        // Extract actual values from Trello objects
+        const actualBoardId = boardId.id || boardId;
+        const actualBoardName = boardName.name || boardName;
+        
+        console.log('🔍 Extracted values:', { 
+          boardId: actualBoardId, 
+          boardName: actualBoardName 
+        });
+        
+        // Process lists to get only id and name
+        const processedLists = lists
+          .filter(list => !list.closed)
+          .map(list => ({
+            id: list.id,
+            name: list.name
+          }));
+        
+        console.log('📋 Processed real lists:', processedLists);
+        
+        // Store data in localStorage for popup to read
+        localStorage.setItem('trello-real-data', JSON.stringify({
+          boardId: actualBoardId,
+          boardName: actualBoardName,
+          realLists: processedLists
+        }));
+        
+        // Also store the board ID separately for easier access
+        localStorage.setItem('current-trello-board-id', actualBoardId);
+        
+        console.log('💾 Real data stored in localStorage');
+        console.log('💾 Board ID stored separately:', actualBoardId);
+        
+      }).catch(function(error) {
+        console.log('❌ Error fetching real data:', error);
+        console.log('🔄 Popup opened without real data');
+      });
+      
+      return popup;
+    }
+  }];
+},
+            'card-buttons': function (t, opts) {
+              console.log('Card buttons called');
+              return [{
+                icon: {
+                  dark: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo=',
+                  light: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo='
+                },
+                text: 'Add to Bio',
+                callback: function (t) {
+                  console.log('Add to Bio clicked');
+                  return t.popup({
+                    title: 'Add Card to Bio Page',
+                    url: './card-popup.html',
+                    height: 600,
+                    args: {
+                      position: 'right'
+                    }
+                  });
+                }
+              }];
+            },
+            'card-badges': function (t, opts) {
+              console.log('Card badges called');
+              return t.get('card', 'shared', 'linkloom-synced').then(function(synced) {
+                if (synced) {
+                  return [{
+                    text: '📎 Bio',
+                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMCAxOGMtNC40MSAwLTgtMy41OS04LThzMy41OS04IDgtOCA4IDMuNTkgOCA4LTMuNTkgOC04IDh6bS0xLTJoMnYtNmgtdjZ6bTAtN2gydi0yaC0ydjJ6IiBmaWxsPSIjNjY3ZWEiLz4KPC9zdmc+',
+                    color: 'green'
+                  }];
+                }
+                return [];
+              });
+            }
+          });
+
+          updateStatus('✅ Power-Up initialized successfully!', 'success');
+          console.log('Power-Up initialization complete');
+
+        } catch (error) {
+          console.error('Error initializing Power-Up:', error);
+          updateStatus('❌ Error initializing: ' + error.message, 'error');
+        }
+      }
+
+      updateStatus('Loading Trello script...', 'loading');
+
+      if (typeof TrelloPowerUp !== 'undefined') {
+        console.log('TrelloPowerUp already available');
+        initializePowerUp();
+      } else {
+        console.log('TrelloPowerUp not available, waiting...');
+        setTimeout(initializePowerUp, 100);
+      }
+
+      // Listen for close messages from popup
+      window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'close-popup') {
+          console.log('Received popup close request - AGGRESSIVELY CLOSING');
+          
+          // Method 1: Use Trello's close method
+          if (window.t && window.t.close) {
+            console.log('Connector using t.close()');
+            window.t.close();
+            return;
+          }
+          
+          // Method 2: Try to close window
+          if (window.close) {
+            console.log('Connector using window.close()');
+            window.close();
+            return;
+          }
+          
+          // Method 3: Nuclear option - redirect
+          console.log('Connector using nuclear option');
+          window.location.href = 'about:blank';
+        }
+      });
+    </script>
+  </body>
+</html>

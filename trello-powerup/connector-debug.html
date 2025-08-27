@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LinkLoom Debug</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f0f0f0;
+        margin: 0;
+      }
+      .debug-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 2px solid #667eea;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+      .success { background: #d4edda; color: #155724; }
+      .error { background: #f8d7da; color: #721c24; }
+      .info { background: #d1ecf1; color: #0c5460; }
+      .warning { background: #fff3cd; color: #856404; }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 LinkLoom Connector Debug</h1>
+    
+    <div class="debug-box">
+      <h3>Step 1: Page Load</h3>
+      <div id="page-load" class="status info">Testing page load...</div>
+    </div>
+
+    <div class="debug-box">
+      <h3>Step 2: Trello Script Load</h3>
+      <div id="script-load" class="status info">Testing Trello script...</div>
+    </div>
+
+    <div class="debug-box">
+      <h3>Step 3: Power-Up Object Check</h3>
+      <div id="object-check" class="status info">Checking TrelloPowerUp...</div>
+    </div>
+
+    <div class="debug-box">
+      <h3>Step 4: Power-Up Initialization</h3>
+      <div id="init-check" class="status info">Testing initialization...</div>
+    </div>
+
+    <div class="debug-box">
+      <h3>Console Output</h3>
+      <div id="console-output" class="status info">Waiting for console messages...</div>
+    </div>
+
+    <div class="debug-box">
+      <h3>Error Log</h3>
+      <div id="error-log" class="status info">No errors yet...</div>
+    </div>
+
+    <script>
+      // Capture console messages
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      
+      function addToConsole(type, message) {
+        const output = document.getElementById('console-output');
+        const timestamp = new Date().toLocaleTimeString();
+        output.innerHTML += `<div><strong>[${timestamp}] ${type}:</strong> ${message}</div>`;
+      }
+      
+      console.log = function(...args) {
+        originalLog.apply(console, args);
+        addToConsole('LOG', args.join(' '));
+      };
+      
+      console.error = function(...args) {
+        originalError.apply(console, args);
+        addToConsole('ERROR', args.join(' '));
+        document.getElementById('error-log').innerHTML += `<div class="error">${args.join(' ')}</div>`;
+      };
+      
+      console.warn = function(...args) {
+        originalWarn.apply(console, args);
+        addToConsole('WARN', args.join(' '));
+      };
+
+      // Step 1: Page Load
+      document.getElementById('page-load').innerHTML = '✅ Page loaded successfully';
+      document.getElementById('page-load').className = 'status success';
+
+      // Step 2: Load Trello Script
+      const script = document.createElement('script');
+      script.src = 'https://p.trellocdn.com/power-up.min.js';
+      
+      script.onload = function() {
+        document.getElementById('script-load').innerHTML = '✅ Trello script loaded successfully';
+        document.getElementById('script-load').className = 'status success';
+        
+        // Step 3: Check if TrelloPowerUp object exists
+        setTimeout(() => {
+          if (typeof TrelloPowerUp !== 'undefined') {
+            document.getElementById('object-check').innerHTML = '✅ TrelloPowerUp object found';
+            document.getElementById('object-check').className = 'status success';
+            
+            // Step 4: Try to initialize
+            try {
+              TrelloPowerUp.initialize({
+                'board-buttons': function (t, opts) {
+                  console.log('Board buttons called with:', opts);
+                  return [{
+                    icon: {
+                      dark: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo=',
+                      light: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo='
+                    },
+                    text: 'LinkLoom',
+                    callback: function (t) {
+                      console.log('LinkLoom button clicked');
+                      return t.popup({
+                        title: 'Connect to LinkLoom',
+                        url: './popup.html',
+                        height: 500
+                      });
+                    }
+                  }];
+                }
+              });
+              
+              document.getElementById('init-check').innerHTML = '✅ Power-Up initialized successfully!';
+              document.getElementById('init-check').className = 'status success';
+              console.log('Power-Up initialization complete');
+              
+            } catch (error) {
+              document.getElementById('init-check').innerHTML = '❌ Error initializing: ' + error.message;
+              document.getElementById('init-check').className = 'status error';
+              console.error('Initialization error:', error);
+            }
+            
+          } else {
+            document.getElementById('object-check').innerHTML = '❌ TrelloPowerUp object not found after 1 second';
+            document.getElementById('object-check').className = 'status error';
+            console.error('TrelloPowerUp object not available');
+          }
+        }, 1000);
+        
+      };
+      
+      script.onerror = function() {
+        document.getElementById('script-load').innerHTML = '❌ Failed to load Trello script';
+        document.getElementById('script-load').className = 'status error';
+        console.error('Failed to load Trello script');
+      };
+      
+      document.head.appendChild(script);
+
+      // Add some test logging
+      console.log('Debug page loaded');
+      console.log('User agent:', navigator.userAgent);
+      console.log('Page URL:', window.location.href);
+    </script>
+  </body>
+</html>

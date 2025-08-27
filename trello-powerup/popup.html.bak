@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Connect LinkLoom</title>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f8f9fa;
+        color: #333;
+      }
+      
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      
+      .logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+      }
+      
+      .title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+      }
+      
+      .subtitle {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      
+      .form-group {
+        margin-bottom: 20px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+      
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+      }
+      
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+      
+      .btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      
+      .btn:hover {
+        opacity: 0.9;
+      }
+      
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .status {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 14px;
+      }
+      
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      
+      .status.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      
+      .help-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 8px;
+        line-height: 1.4;
+      }
+      
+      .divider {
+        margin: 20px 0;
+        border: none;
+        border-top: 1px solid #e1e5e9;
+      }
+      
+      .features {
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid #e1e5e9;
+      }
+      
+      .features h4 {
+        margin: 0 0 12px 0;
+        font-size: 16px;
+        color: #333;
+      }
+      
+      .feature {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #666;
+      }
+      
+      .feature:before {
+        content: "✓";
+        color: #28a745;
+        font-weight: bold;
+        margin-right: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">L</div>
+        <h1 class="title">Connect LinkLoom</h1>
+        <p class="subtitle">Automatically sync your Trello content to your bio page</p>
+      </div>
+
+      <form id="connectForm">
+        <div class="form-group">
+          <label for="linkloomUrl">LinkLoom URL</label>
+          <input 
+            type="url" 
+            id="linkloomUrl" 
+            placeholder="https://your-subdomain.linkloom.app"
+            required
+          />
+          <div class="help-text">
+            Your LinkLoom bio page URL (found in your dashboard)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="syncList">Sync List</label>
+          <select id="syncList" required>
+            <option value="">Select a list to sync...</option>
+          </select>
+          <div class="help-text">
+            Cards from this list will automatically appear on your bio page
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="syncRule">Sync Rule</label>
+          <select id="syncRule">
+            <option value="latest">Latest 5 cards</option>
+            <option value="all">All cards</option>
+            <option value="pinned">Pinned cards only</option>
+            <option value="labeled">Cards with specific labels</option>
+          </select>
+          <div class="help-text">
+            How many cards to sync and display
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="connectBtn">
+          Connect LinkLoom
+        </button>
+      </form>
+
+      <div class="divider"></div>
+
+      <div class="features">
+        <h4>What happens next?</h4>
+        <div class="feature">Cards automatically sync to your bio page</div>
+        <div class="feature">Real-time updates when content changes</div>
+        <div class="feature">Track clicks and engagement</div>
+        <div class="feature">Manage everything from your dashboard</div>
+      </div>
+
+      <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+      let t;
+      let lists = [];
+
+      // Initialize the Power-Up
+      TrelloPowerUp.initialize({
+        'show-settings': function (t, options) {
+          return t.popup({
+            title: 'LinkLoom Settings',
+            url: './popup.html',
+            height: 500
+          });
+        }
+      });
+
+      // Get Trello context when popup loads
+      window.addEventListener('load', function () {
+        t = TrelloPowerUp.iframe();
+        
+        // Load board lists
+        loadLists();
+        
+        // Check if already connected
+        checkConnection();
+      });
+
+      async function loadLists() {
+        try {
+          const board = await t.board('id');
+          lists = await t.lists();
+          
+          const select = document.getElementById('syncList');
+          select.innerHTML = '<option value="">Select a list to sync...</option>';
+          
+          lists.forEach(list => {
+            const option = document.createElement('option');
+            option.value = list.id;
+            option.textContent = list.name;
+            select.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Error loading lists:', error);
+        }
+      }
+
+      async function checkConnection() {
+        try {
+          const connected = await t.get('board', 'shared', 'linkloom_connected');
+          if (connected) {
+            showStatus('LinkLoom is already connected to this board!', 'success');
+            document.getElementById('connectBtn').disabled = true;
+            document.getElementById('connectBtn').textContent = 'Already Connected';
+          }
+        } catch (error) {
+          console.error('Error checking connection:', error);
+        }
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = `status ${type}`;
+        status.style.display = 'block';
+      }
+
+      document.getElementById('connectForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        
+        const linkloomUrl = document.getElementById('linkloomUrl').value;
+        const syncList = document.getElementById('syncList').value;
+        const syncRule = document.getElementById('syncRule').value;
+        
+        if (!linkloomUrl || !syncList) {
+          showStatus('Please fill in all required fields', 'error');
+          return;
+        }
+
+        const connectBtn = document.getElementById('connectBtn');
+        connectBtn.disabled = true;
+        connectBtn.textContent = 'Connecting...';
+
+        try {
+          // Save connection settings to Trello
+          await t.set('board', 'shared', 'linkloom_connected', true);
+          await t.set('board', 'shared', 'linkloom_url', linkloomUrl);
+          await t.set('board', 'shared', 'linkloom_list', syncList);
+          await t.set('board', 'shared', 'linkloom_rule', syncRule);
+          await t.set('board', 'shared', 'linkloom_connected_at', new Date().toISOString());
+
+          showStatus('Successfully connected to LinkLoom! Your content will now sync automatically.', 'success');
+          
+          // Close popup after success
+          setTimeout(() => {
+            t.closePopup();
+          }, 2000);
+
+        } catch (error) {
+          console.error('Error connecting:', error);
+          showStatus('Failed to connect. Please try again.', 'error');
+          connectBtn.disabled = false;
+          connectBtn.textContent = 'Connect LinkLoom';
+        }
+      });
+    </script>
+  </body>
+</html>

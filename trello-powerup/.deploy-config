@@ -1,0 +1,5 @@
+# LinkLoom Trello Power-Up Deployment Configuration
+# This file saves your domain so you don't have to enter it every time
+
+POWERUP_DOMAIN="dapper-eclair-8ecd0e.netlify.app"
+DEPLOYMENT_PLATFORM="1"

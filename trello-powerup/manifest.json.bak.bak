@@ -1,0 +1,26 @@
+{
+  "name": "LinkLoom",
+  "details": "Automatically sync your Trello content to your bio page",
+  "icon": {
+    "url": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzY2N2VlYSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkw8L3RleHQ+Cjwvc3ZnPgo="
+  },
+  "author": "LinkLoom",
+  "capabilities": [
+    "board-buttons",
+    "card-buttons",
+    "card-badges",
+    "board-badges",
+    "callback",
+    "show-settings"
+  ],
+  "connectors": {
+    "iframeConnectorUrl": "https://luminous-pothos-7bebc1.netlify.app/connector.html"
+  },
+  "origins": [
+    "https://luminous-pothos-7bebc1.netlify.app"
+  ],
+  "permissions": [
+    "read",
+    "write"
+  ]
+}

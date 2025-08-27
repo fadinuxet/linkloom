@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LinkLoom Test</title>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  </head>
+  <body>
+    <h1>LinkLoom Test Power-Up</h1>
+    <p>This is a simple test connector.</p>
+    
+    <script>
+      console.log('Test connector loading...');
+      
+      function initializePowerUp() {
+        if (typeof TrelloPowerUp !== 'undefined') {
+          console.log('TrelloPowerUp found, initializing...');
+          
+          TrelloPowerUp.initialize({
+            'board-buttons': function (t, opts) {
+              console.log('Board buttons called!');
+              return [{
+                icon: 'https://dapper-eclair-8ecd0e.netlify.app/linkloom.png',
+                text: 'Test LinkLoom',
+                callback: function (t) {
+                  alert('Test Power-Up is working!');
+                }
+              }];
+            }
+          });
+          
+          console.log('Test Power-Up initialized!');
+        } else {
+          console.log('TrelloPowerUp not found, waiting...');
+          setTimeout(initializePowerUp, 100);
+        }
+      }
+      
+      // Start initialization
+      initializePowerUp();
+    </script>
+  </body>
+</html>

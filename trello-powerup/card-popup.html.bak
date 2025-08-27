@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Add to LinkLoom Bio</title>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f8f9fa;
+        color: #333;
+      }
+      
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      
+      .card-preview {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+        border: 1px solid #e1e5e9;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+      }
+      
+      .card-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+        margin-bottom: 12px;
+      }
+      
+      .card-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 12px;
+        color: #888;
+      }
+      
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      
+      .form-group {
+        margin-bottom: 20px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+      
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+      
+      .form-group input:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+      
+      .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+      
+      .btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      
+      .btn:hover {
+        opacity: 0.9;
+      }
+      
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .btn.secondary {
+        background: #6c757d;
+        margin-top: 12px;
+      }
+      
+      .status {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 14px;
+      }
+      
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      
+      .status.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      
+      .help-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 8px;
+        line-height: 1.4;
+      }
+      
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      
+      .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+      }
+      
+      .checkbox-group label {
+        margin: 0;
+        font-size: 14px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="cardPreview" class="card-preview">
+        <div class="card-title">Loading card...</div>
+        <div class="card-description"></div>
+        <div class="card-meta"></div>
+      </div>
+
+      <form id="addToBioForm">
+        <div class="form-group">
+          <label for="linkTitle">Link Title</label>
+          <input 
+            type="text" 
+            id="linkTitle" 
+            placeholder="Enter a title for this link"
+            required
+          />
+          <div class="help-text">
+            This will be displayed on your bio page
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="linkDescription">Description (Optional)</label>
+          <textarea 
+            id="linkDescription" 
+            placeholder="Add a description to help visitors understand this link"
+          ></textarea>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="pinToTop" />
+          <label for="pinToTop">Pin to top of bio page</label>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="autoSync" checked />
+          <label for="autoSync">Auto-sync when card updates</label>
+        </div>
+
+        <button type="submit" class="btn" id="addBtn">
+          Add to Bio Page
+        </button>
+        
+        <button type="button" class="btn secondary" id="removeBtn" style="display: none;">
+          Remove from Bio Page
+        </button>
+      </form>
+
+      <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+      let t;
+      let currentCard;
+      let isAlreadyAdded = false;
+
+      // Initialize the Power-Up
+      TrelloPowerUp.initialize({
+        'card-buttons': function (t, opts) {
+          return [{
+            icon: {
+              dark: 'https://linkloom.app/link-icon-dark.png',
+              light: 'https://linkloom.app/link-icon-light.png'
+            },
+            text: 'Add to Bio',
+            callback: function (t) {
+              return t.popup({
+                title: 'Add to LinkLoom Bio',
+                url: './card-popup.html',
+                height: 400
+              });
+            }
+          }];
+        }
+      });
+
+      // Get Trello context when popup loads
+      window.addEventListener('load', function () {
+        t = TrelloPowerUp.iframe();
+        
+        // Load current card data
+        loadCardData();
+        
+        // Check if card is already in bio page
+        checkBioStatus();
+      });
+
+      async function loadCardData() {
+        try {
+          currentCard = await t.card('all');
+          
+          const preview = document.getElementById('cardPreview');
+          const title = document.getElementById('linkTitle');
+          const description = document.getElementById('linkDescription');
+          
+          // Update preview
+          preview.querySelector('.card-title').textContent = currentCard.name;
+          preview.querySelector('.card-description').textContent = 
+            currentCard.desc || 'No description';
+          
+          // Update form fields
+          title.value = currentCard.name;
+          description.value = currentCard.desc || '';
+          
+          // Update meta info
+          const meta = preview.querySelector('.card-meta');
+          meta.innerHTML = `
+            <div class="meta-item">
+              <span>📅</span>
+              <span>${new Date(currentCard.dateLastActivity).toLocaleDateString()}</span>
+            </div>
+            <div class="meta-item">
+              <span>🏷️</span>
+              <span>${currentCard.labels?.length || 0} labels</span>
+            </div>
+            <div class="meta-item">
+              <span>📎</span>
+              <span>${currentCard.attachments?.length || 0} attachments</span>
+            </div>
+          `;
+          
+        } catch (error) {
+          console.error('Error loading card data:', error);
+        }
+      }
+
+      async function checkBioStatus() {
+        try {
+          const status = await t.get('card', 'shared', 'linkloom_status');
+          if (status === 'synced') {
+            isAlreadyAdded = true;
+            showStatus('This card is already in your bio page!', 'info');
+            document.getElementById('addBtn').style.display = 'none';
+            document.getElementById('removeBtn').style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Error checking bio status:', error);
+        }
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = `status ${type}`;
+        status.style.display = 'block';
+      }
+
+      document.getElementById('addToBioForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('linkTitle').value;
+        const description = document.getElementById('linkDescription').value;
+        const pinToTop = document.getElementById('pinToTop').checked;
+        const autoSync = document.getElementById('autoSync').checked;
+        
+        if (!title) {
+          showStatus('Please enter a title for the link', 'error');
+          return;
+        }
+
+        const addBtn = document.getElementById('addBtn');
+        addBtn.disabled = true;
+        addBtn.textContent = 'Adding...';
+
+        try {
+          // Save card data to Trello
+          await t.set('card', 'shared', 'linkloom_status', 'synced');
+          await t.set('card', 'shared', 'linkloom_title', title);
+          await t.set('card', 'shared', 'linkloom_description', description);
+          await t.set('card', 'shared', 'linkloom_pinned', pinToTop);
+          await t.set('card', 'shared', 'linkloom_auto_sync', autoSync);
+          await t.set('card', 'shared', 'linkloom_synced_at', new Date().toISOString());
+          await t.set('card', 'shared', 'linkloom_card_url', currentCard.url);
+
+          showStatus('Successfully added to your bio page!', 'success');
+          
+          // Update UI
+          isAlreadyAdded = true;
+          document.getElementById('addBtn').style.display = 'none';
+          document.getElementById('removeBtn').style.display = 'block';
+          
+          // Close popup after success
+          setTimeout(() => {
+            t.closePopup();
+          }, 2000);
+
+        } catch (error) {
+          console.error('Error adding to bio:', error);
+          showStatus('Failed to add to bio page. Please try again.', 'error');
+          addBtn.disabled = false;
+          addBtn.textContent = 'Add to Bio Page';
+        }
+      });
+
+      document.getElementById('removeBtn').addEventListener('click', async function () {
+        if (!confirm('Are you sure you want to remove this card from your bio page?')) {
+          return;
+        }
+
+        const removeBtn = document.getElementById('removeBtn');
+        removeBtn.disabled = true;
+        removeBtn.textContent = 'Removing...';
+
+        try {
+          // Remove card data from Trello
+          await t.set('card', 'shared', 'linkloom_status', null);
+          await t.set('card', 'shared', 'linkloom_title', null);
+          await t.set('card', 'shared', 'linkloom_description', null);
+          await t.set('card', 'shared', 'linkloom_pinned', null);
+          await t.set('card', 'shared', 'linkloom_auto_sync', null);
+          await t.set('card', 'shared', 'linkloom_synced_at', null);
+          await t.set('card', 'shared', 'linkloom_card_url', null);
+
+          showStatus('Removed from bio page successfully!', 'success');
+          
+          // Update UI
+          isAlreadyAdded = false;
+          document.getElementById('addBtn').style.display = 'block';
+          document.getElementById('removeBtn').style.display = 'none';
+          
+          // Close popup after success
+          setTimeout(() => {
+            t.closePopup();
+          }, 2000);
+
+        } catch (error) {
+          console.error('Error removing from bio:', error);
+          showStatus('Failed to remove from bio page. Please try again.', 'error');
+          removeBtn.disabled = false;
+          removeBtn.textContent = 'Remove from Bio Page';
+        }
+      });
+    </script>
+  </body>
+</html>
