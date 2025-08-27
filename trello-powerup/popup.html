@@ -297,8 +297,16 @@
           <button class="btn" onclick="syncAgain()" style="width: 100%; background: #28a745; margin-bottom: 10px;">
             🔄 Sync Now
           </button>
-          <button class="btn" onclick="disconnectAndReconnect()" style="width: 100%; background: #dc3545;">
-            Disconnect & Reconnect
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <button class="btn" onclick="disconnectAndReconnect()" style="flex: 1; background: #ffc107; color: #000; font-size: 12px;">
+              🔒 Hide Connection
+            </button>
+            <button class="btn" onclick="resetConnection()" style="flex: 1; background: #dc3545; font-size: 12px;">
+              🗑️ Reset All
+            </button>
+          </div>
+          <button class="btn" onclick="reconnectToPrevious()" style="width: 100%; background: #17a2b8; font-size: 12px;">
+            🔗 Reconnect to Previous
           </button>
         </div>
       </div>
@@ -1214,15 +1222,28 @@
       
       function disconnectAndReconnect() {
         try {
-          // Remove connection data
-          localStorage.removeItem('linkloom-connection');
-          localStorage.removeItem('current-trello-board-id');
-          console.log('Connection disconnected');
+          // Don't remove connection data - just hide the connected view
+          console.log('Connection temporarily hidden - data preserved for reconnection');
           
           // Show the connection form again
           document.getElementById('alreadyConnected').classList.add('hidden');
           document.getElementById('connectionForm').classList.remove('hidden');
           document.getElementById('status').classList.remove('hidden');
+          
+          // Show reconnection option
+          showStatus('Connection hidden. Click "Reconnect" to restore your setup.', 'info');
+          
+        } catch (error) {
+          console.error('Error hiding connection:', error);
+        }
+      }
+      
+      function resetConnection() {
+        try {
+          // Actually remove connection data for fresh start
+          localStorage.removeItem('linkloom-connection');
+          localStorage.removeItem('current-trello-board-id');
+          console.log('Connection completely reset');
           
           // Reset form and reload lists
           document.getElementById('syncList').value = '';
@@ -1239,10 +1260,41 @@
           currentBoard = { id: 'working-board', name: 'Your Board' };
           currentList = null;
           
-          showStatus('Ready to reconnect', 'success');
+          showStatus('Connection reset. Start fresh setup.', 'success');
           
         } catch (error) {
-          console.error('Error disconnecting:', error);
+          console.error('Error resetting connection:', error);
+        }
+      }
+      
+      function reconnectToPrevious() {
+        try {
+          // Check if we have previous connection data
+          const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
+          if (!connection) {
+            showStatus('No previous connection found to restore.', 'error');
+            return;
+          }
+          
+          console.log('Restoring previous connection:', connection);
+          
+          // Hide connection form and show connected view
+          document.getElementById('connectionForm').classList.add('hidden');
+          document.getElementById('status').classList.add('hidden');
+          document.getElementById('alreadyConnected').classList.remove('hidden');
+          
+          // Update connection details and populate lists
+          updateConnectionDetails();
+          populateListConnections();
+          
+          // Refresh real lists with stored token
+          refreshRealListsIfPossible();
+          
+          showStatus('Previous connection restored successfully!', 'success');
+          
+        } catch (error) {
+          console.error('Error reconnecting:', error);
+          showStatus('Failed to restore connection. Please reconnect manually.', 'error');
         }
       }
 
