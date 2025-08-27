@@ -1050,8 +1050,18 @@
         try {
           console.log('📡 Fetching real lists for board:', boardId);
           
-          // Use Trello API to get lists
-          const response = await fetch(`https://api.trello.com/1/boards/${boardId}/lists?key=${TRELLO_API_KEY}`);
+          // Check if we have a stored Trello token
+          const connection = JSON.parse(localStorage.getItem('linkloom-connection') || '{}');
+          const trelloToken = connection.trelloToken;
+          
+          if (!trelloToken) {
+            console.log('⚠️ No Trello token available, using fallback data');
+            loadBoardDataWithFallback();
+            return;
+          }
+          
+          // Use Trello API to get lists with authentication
+          const response = await fetch(`https://api.trello.com/1/boards/${boardId}/lists?key=${TRELLO_API_KEY}&token=${trelloToken}`);
           
           if (!response.ok) {
             throw new Error(`Trello API error: ${response.status}`);
@@ -1104,8 +1114,51 @@
         
         // Populate list connections
         populateListConnections();
+        
+                // Try to refresh real lists if we have a token
+        refreshRealListsIfPossible();
       }
-
+      
+      async function refreshRealListsIfPossible() {
+        try {
+          // Check if we have a connection with a token
+          const connection = JSON.parse(localStorage.getItem('linkloom-connection') || '{}');
+          if (!connection.trelloToken || !connection.boardId) {
+            console.log('⚠️ No token or board ID available for list refresh');
+            return;
+          }
+          
+          console.log('🔄 Refreshing real lists with stored token...');
+          
+          // Use Trello API to get lists with authentication
+          const response = await fetch(`https://api.trello.com/1/boards/${connection.boardId}/lists?key=${TRELLO_API_KEY}&token=${connection.trelloToken}`);
+          
+          if (!response.ok) {
+            throw new Error(`Trello API error: ${response.status}`);
+          }
+          
+          const lists = await response.json();
+          console.log('✅ Real lists refreshed from API:', lists);
+          
+          // Process real lists
+          workingLists = lists
+            .filter(list => !list.closed)
+            .map(list => ({
+              id: list.id,
+              name: list.name,
+              closed: list.closed
+            }));
+          
+          console.log('📋 Updated working lists:', workingLists);
+          
+          // Refresh the add list dropdown
+          populateAddListDropdown();
+          
+        } catch (error) {
+          console.error('❌ Error refreshing lists:', error);
+        }
+      }
+      
       function disconnectAndReconnect() {
         try {
           // Remove connection data
