@@ -345,28 +345,19 @@
       function initializePowerUp() {
         console.log('🔧 Initializing Power-Up...');
         
-        // FIRST PRIORITY: Check if we have an existing connection
-        const connectionData = localStorage.getItem('linkloom-connection');
-        console.log('🔍 FIRST PRIORITY - Checking existing connection:', connectionData);
-        
-        if (connectionData) {
-          try {
-            const connection = JSON.parse(connectionData);
-            console.log('✅ EXISTING CONNECTION FOUND! Showing already connected view...');
-            
-            // Set current board
-            currentBoard = { 
-              id: connection.boardId, 
-              name: connection.boardName || 'Your Trello Board' 
-            };
-            
-            // Show already connected view immediately
-            showAlreadyConnected();
-            return;
-          } catch (error) {
-            console.log('❌ Error parsing connection data:', error);
+        // FIRST PRIORITY: Always try to get real Trello data first
+        getCurrentBoardId().then(boardId => {
+          if (boardId) {
+            console.log('🔍 FIRST PRIORITY - Got board ID:', boardId);
+            fetchRealListsForBoard(boardId).then(() => {
+              // After fetching real lists, check for existing connection
+              checkExistingConnection();
+            });
+          } else {
+            console.log('❌ FIRST PRIORITY - No board ID found, using test data');
+            checkExistingConnection();
           }
-        }
+        });
         
         // SECOND PRIORITY: Listen for real Trello data from connector
         window.addEventListener('message', function(event) {
@@ -430,7 +421,83 @@
         console.log('🔄 No data found, loading fallback data...');
         loadBoardDataWithFallback();
       }
+      
+            function checkExistingConnection() {
+        // Check if we have an existing connection
+        const connectionData = localStorage.getItem('linkloom-connection');
+        console.log('🔍 Checking existing connection:', connectionData);
+        
+        if (connectionData) {
+          try {
+            const connection = JSON.parse(connectionData);
+            console.log('✅ EXISTING CONNECTION FOUND! Showing already connected view...');
+            
+            // Set current board
+            currentBoard = { 
+              id: connection.boardId, 
+              name: connection.boardName || 'Your Trello Board' 
+            };
+            
+            // Show already connected view immediately
+            showAlreadyConnected();
+          } catch (error) {
+            console.log('❌ Error parsing connection data:', error);
+            showConnectionForm();
+          }
+        } else {
+          // No existing connection, show connection form
+          showConnectionForm();
+        }
+      }
 
+      function initializeWithRealData(boardId, boardName, realLists) {
+        console.log('🔧 Initializing with real Trello data:', { boardId, boardName, realLists });
+        
+        // Set current board
+        currentBoard = { id: boardId, name: boardName };
+        
+        // Store real board data
+        localStorage.setItem('current-trello-board-id', boardId);
+        localStorage.setItem('trello-real-data', JSON.stringify({
+          boardId: boardId,
+          boardName: boardName,
+          realLists: realLists
+        }));
+        
+        // Use real lists
+        workingLists = realLists;
+        console.log('📋 Real lists loaded:', workingLists);
+        
+        // Populate list dropdown
+        populateListDropdown(workingLists);
+        
+        // Check for existing connection after loading real data
+        checkExistingConnection();
+      }
+      
+      function loadBoardDataWithFallback() {
+        console.log('🔄 Loading fallback board data...');
+        
+        // Set fallback board
+        currentBoard = { id: 'working-board', name: 'Your Board' };
+        
+        // Use fallback lists
+        workingLists = [
+          { id: 'todo', name: 'To Do', closed: false },
+          { id: 'doing', name: 'Doing', closed: false },
+          { id: 'done', name: 'Done', closed: false },
+          { id: 'linkloom', name: 'LinkLoom', closed: false },
+          { id: 'backlog', name: 'Backlog', closed: false },
+          { id: 'in-progress', name: 'In Progress', closed: false }
+        ];
+        
+        // Populate list dropdown
+        populateListDropdown(workingLists);
+        
+        // Check for existing connection
+        checkExistingConnection();
+      }
+      
       async function fetchRealTrelloData() {
         try {
           console.log('🏢 Fetching real Trello data via API...');
