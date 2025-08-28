@@ -197,6 +197,12 @@
         display: none;
       }
       
+      /* Hide popup elements by default */
+      #successPopup.hidden,
+      #popupOverlay.hidden {
+        display: none !important;
+      }
+      
       /* ========================================
          BEAUTIFUL DARK THEME DESIGN
          ======================================== */
@@ -430,6 +436,95 @@
         box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
       }
       
+      /* Success Popup Styles */
+      .success-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        max-width: 320px;
+        text-align: center;
+        animation: popupSlideIn 0.3s ease-out;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      
+      .success-popup .icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 28px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+      }
+      
+      .success-popup .title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1F2937;
+        margin-bottom: 8px;
+      }
+      
+      .success-popup .message {
+        font-size: 14px;
+        color: #6B7280;
+        line-height: 1.5;
+        margin-bottom: 20px;
+      }
+      
+      .success-popup .close-btn {
+        background: #F3F4F6;
+        color: #6B7280;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .success-popup .close-btn:hover {
+        background: #E5E7EB;
+        color: #374151;
+      }
+      
+      @keyframes popupSlideIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+      
+      .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        animation: fadeIn 0.2s ease-out;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
       /* Settings tab styling */
       .settings-content {
         background: #262626;
@@ -647,6 +742,17 @@
          </div>
        </div>
     </div>
+    
+    <!-- Success Popup -->
+    <div id="successPopup" class="success-popup hidden">
+      <div class="icon">✅</div>
+      <div class="title">Sync Successful!</div>
+      <div class="message" id="popupMessage">Cards have been synced successfully.</div>
+      <button class="close-btn" onclick="closeSuccessPopup()">Close</button>
+    </div>
+    
+    <!-- Popup Overlay -->
+    <div id="popupOverlay" class="popup-overlay hidden"></div>
 
     <script>
       // Trello API configuration from config file
@@ -1095,7 +1201,7 @@
           }
           
           // Show success message for multiple lists
-          showStatus(`✅ Re-sync successful! ${totalCardsSynced} cards synced from ${totalListsSynced} lists.`, 'success');
+          showSuccessPopup(`${totalCardsSynced} cards synced from ${totalListsSynced} lists.`);
           
           // Update connection details
           updateConnectionDetails();
@@ -1318,6 +1424,37 @@
           setTimeout(() => {
             unifiedStatusElement.classList.add('hidden');
           }, 5000);
+        }
+      }
+      
+      // Success Popup Functions
+      function showSuccessPopup(message) {
+        const popup = document.getElementById('successPopup');
+        const overlay = document.getElementById('popupOverlay');
+        const messageElement = document.getElementById('popupMessage');
+        
+        if (messageElement) {
+          messageElement.textContent = message;
+        }
+        
+        if (popup && overlay) {
+          popup.classList.remove('hidden');
+          overlay.classList.remove('hidden');
+          
+          // Auto-dismiss after 4 seconds
+          setTimeout(() => {
+            closeSuccessPopup();
+          }, 4000);
+        }
+      }
+      
+      function closeSuccessPopup() {
+        const popup = document.getElementById('successPopup');
+        const overlay = document.getElementById('popupOverlay');
+        
+        if (popup && overlay) {
+          popup.classList.add('hidden');
+          overlay.classList.add('hidden');
         }
       }
       
