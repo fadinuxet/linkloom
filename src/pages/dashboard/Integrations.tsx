@@ -51,7 +51,7 @@ export default function Integrations() {
       console.log('📡 Fetching from Supabase...')
       const { data: links, error } = await supabase
         .from('links')
-        .select('trello_card_id, metadata')
+        .select('trello_card_id, metadata, created_at, updated_at')
         .limit(1)
       
       if (error) {
@@ -62,11 +62,32 @@ export default function Integrations() {
       
       // Check if we have any Trello cards in the database
       if (links && links.length > 0) {
-        console.log('🎯 Found Trello data in database')
-        // We have Trello data, so Power-Up is connected
+        console.log('🎯 Found Trello data in database:', links)
+        // We have Trello data, but let's verify it's actually from a connected Power-Up
         const firstLink = links[0]
         const metadata = firstLink.metadata || {}
         
+        // Check if this is recent data (within last 24 hours) or old test data
+        const linkDate = new Date(firstLink.created_at || firstLink.updated_at || Date.now())
+        const now = new Date()
+        const hoursDiff = (now.getTime() - linkDate.getTime()) / (1000 * 60 * 60)
+        
+        console.log('📅 Link age:', hoursDiff.toFixed(1), 'hours old')
+        
+        if (hoursDiff > 24) {
+          console.log('⚠️ Data is old (>24h), likely test data. Power-Up not connected.')
+          setTrelloIntegration({
+            isConnected: false,
+            boardName: "",
+            listName: "",
+            lastSync: "Old test data found",
+            status: "disconnected",
+            isLoading: false
+          })
+          return
+        }
+        
+        // Data is recent, so Power-Up is likely connected
         setTrelloIntegration({
           isConnected: true,
           boardName: metadata.trello_board_name || "Trello Board",
@@ -75,7 +96,7 @@ export default function Integrations() {
           status: "active",
           isLoading: false
         })
-        console.log('✅ Set integration as connected')
+        console.log('✅ Set integration as connected (recent data)')
         return
       }
       
@@ -529,6 +550,28 @@ export default function Integrations() {
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Check Database
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={async () => {
+                  if (confirm('Clear all old test data from database? This will reset the integration status.')) {
+                    console.log('🗑️ Clearing old test data...')
+                    const { error } = await supabase
+                      .from('links')
+                      .delete()
+                      .neq('trello_card_id', '')
+                    if (error) {
+                      console.error('❌ Error clearing data:', error)
+                    } else {
+                      console.log('✅ Old test data cleared')
+                      checkTrelloIntegration()
+                    }
+                  }
+                }}
+                className="border-red-300 text-red-700 ml-2"
+              >
+                🗑️ Clear Test Data
               </Button>
             </div>
           </CardContent>
