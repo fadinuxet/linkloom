@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
+import { supabase } from '../../lib/supabase'
 import { 
   Trello, 
   CheckCircle, 
@@ -40,7 +41,34 @@ export default function Integrations() {
 
   const checkTrelloIntegration = async () => {
     try {
-      // Check for Power-Up connection data
+      // First try to get data from Supabase (real-time connection)
+      const { data: links, error } = await supabase
+        .from('links')
+        .select('trello_card_id, metadata')
+        .limit(1)
+      
+      if (error) {
+        console.error('Error fetching from Supabase:', error)
+      }
+      
+      // Check if we have any Trello cards in the database
+      if (links && links.length > 0) {
+        // We have Trello data, so Power-Up is connected
+        const firstLink = links[0]
+        const metadata = firstLink.metadata || {}
+        
+        setTrelloIntegration({
+          isConnected: true,
+          boardName: metadata.trello_board_name || "Trello Board",
+          listName: metadata.trello_list_name || "Multiple Lists",
+          lastSync: "Connected via Power-Up",
+          status: "active",
+          isLoading: false
+        })
+        return
+      }
+      
+      // Fallback: Check localStorage (for development/testing)
       const connectionData = localStorage.getItem('linkloom-connection')
       const trelloData = localStorage.getItem('trello-real-data')
       
@@ -49,7 +77,6 @@ export default function Integrations() {
           const connection = JSON.parse(connectionData)
           const trello = JSON.parse(trelloData)
           
-          // Get list connections info
           const listConnections = connection.listConnections || []
           const connectedLists = listConnections.map((conn: any) => conn.listName).join(', ')
           
@@ -57,7 +84,7 @@ export default function Integrations() {
             isConnected: true,
             boardName: trello.boardName || connection.boardName || "Content Calendar",
             listName: connectedLists || "Multiple Lists",
-            lastSync: "Connected via Power-Up",
+            lastSync: "Connected via Power-Up (Local)",
             status: "active",
             isLoading: false
           })
@@ -419,6 +446,15 @@ export default function Integrations() {
               <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
                 💡 Your Trello cards are automatically syncing to LinkLoom via the Power-Up
               </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={checkTrelloIntegration}
+                className="border-blue-300 text-blue-700"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh Status
+              </Button>
             </div>
           ) : (
             <div className="text-center py-4">
@@ -433,6 +469,52 @@ export default function Integrations() {
           )}
         </CardContent>
       </Card>
+
+      {/* Debug Info (Development Only) */}
+      {process.env.NODE_ENV === 'development' && (
+        <Card className="mb-6 border-2 border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">🐛</span>
+                </div>
+                <div>
+                  <CardTitle className="text-yellow-900 text-lg">Debug Info</CardTitle>
+                  <CardDescription className="text-yellow-700">
+                    Development debugging information
+                  </CardDescription>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-sm">
+              <div>
+                <span className="text-yellow-700 font-medium">localStorage linkloom-connection:</span>
+                <pre className="text-xs bg-yellow-100 p-2 rounded mt-1 overflow-auto">
+                  {localStorage.getItem('linkloom-connection') || 'Not found'}
+                </pre>
+              </div>
+              <div>
+                <span className="text-yellow-700 font-medium">localStorage trello-real-data:</span>
+                <pre className="text-xs bg-yellow-100 p-2 rounded mt-1 overflow-auto">
+                  {localStorage.getItem('trello-real-data') || 'Not found'}
+                </pre>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={checkTrelloIntegration}
+                className="border-yellow-300 text-yellow-700"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Check Database
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Trello Integration */}
       <Card>
