@@ -297,8 +297,11 @@
           <button class="btn" onclick="syncAgain()" style="width: 100%; background: #28a745; margin-bottom: 10px;">
             🔄 Sync Now
           </button>
-          <button class="btn" onclick="disconnectAndReconnect()" style="width: 100%; background: #dc3545;">
+          <button class="btn" onclick="disconnectAndReconnect()" style="width: 100%; background: #dc3545; margin-bottom: 10px;">
             Disconnect
+          </button>
+          <button class="btn" onclick="autoRestoreConnection()" style="width: 100%; background: #17a2b8;">
+            🔗 Reconnect to Previous
           </button>
         </div>
       </div>
@@ -1227,17 +1230,8 @@
           document.getElementById('connectionForm').classList.remove('hidden');
           document.getElementById('status').classList.remove('hidden');
           
-          // Show reconnection message
-          showStatus('Connection hidden. Your lists are preserved. Connect again to restore.', 'info');
-          
-          // Auto-check for existing connections after a short delay
-          setTimeout(() => {
-            if (autoRestoreConnection()) {
-              console.log('✅ Auto-restored previous connection');
-            } else {
-              console.log('ℹ️ No previous connection to restore');
-            }
-          }, 500);
+          // Show reconnection message with manual reconnect option
+          showStatus('Connection hidden. Your lists are preserved. Click "Reconnect" to restore.', 'info');
           
         } catch (error) {
           console.error('Error hiding connection:', error);
