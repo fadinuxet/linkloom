@@ -1230,8 +1230,51 @@
           // Show reconnection message
           showStatus('Connection hidden. Your lists are preserved. Connect again to restore.', 'info');
           
+          // Auto-check for existing connections after a short delay
+          setTimeout(() => {
+            if (autoRestoreConnection()) {
+              console.log('✅ Auto-restored previous connection');
+            } else {
+              console.log('ℹ️ No previous connection to restore');
+            }
+          }, 500);
+          
         } catch (error) {
           console.error('Error hiding connection:', error);
+        }
+      }
+      
+      function autoRestoreConnection() {
+        try {
+          const connectionData = localStorage.getItem('linkloom-connection');
+          if (connectionData) {
+            const connection = JSON.parse(connectionData);
+            console.log('🔄 Auto-restoring previous connection:', connection);
+            
+            // Check if we have a valid connection with lists
+            if (connection.listConnections && connection.listConnections.length > 0) {
+              console.log('✅ Found previous connection with', connection.listConnections.length, 'lists');
+              
+              // Hide connection form and show connected view
+              document.getElementById('connectionForm').classList.add('hidden');
+              document.getElementById('status').classList.add('hidden');
+              document.getElementById('alreadyConnected').classList.remove('hidden');
+              
+              // Update connection details and populate lists
+              updateConnectionDetails();
+              populateListConnections();
+              
+              // Refresh real lists with stored token
+              refreshRealListsIfPossible();
+              
+              showStatus('Previous connection restored! All your lists are back.', 'success');
+              return true;
+            }
+          }
+          return false;
+        } catch (error) {
+          console.error('Error auto-restoring connection:', error);
+          return false;
         }
       }
       
