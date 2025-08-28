@@ -16,7 +16,7 @@
       }
       
       .container {
-        max-width: 300px;
+        max-width: 350px;
         margin: 0 auto;
         background: white;
         border-radius: 12px;
@@ -302,14 +302,12 @@
       .list-card {
         background: #262626;
         border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        padding: 16px;
+        margin-bottom: 12px;
         transition: all 0.2s ease;
         border: 1px solid #404040;
-        min-height: 60px; /* Ensure consistent height */
+        min-height: 80px; /* Increased height for new layout */
+        position: relative; /* For absolute positioning of bottom elements */
       }
       
       .list-card:hover {
@@ -318,11 +316,12 @@
         box-shadow: 0 4px 15px rgba(102, 51, 204, 0.15);
       }
       
-      .list-info {
+      /* Top section: Icon + Title */
+      .list-top {
         display: flex;
         align-items: center;
         gap: 12px;
-        flex: 1;
+        margin-bottom: 20px; /* Space for bottom section */
       }
       
       .list-icon {
@@ -334,25 +333,29 @@
         align-items: center;
         justify-content: center;
         font-size: 14px;
-        flex-shrink: 0; /* Prevent icon from shrinking */
+        flex-shrink: 0;
       }
       
-      .list-details h4 {
+      .list-title {
         font-size: 14px;
         font-weight: 600;
         color: white;
-        margin: 0; /* Remove bottom margin */
+        margin: 0;
+        line-height: 1.2;
+        max-width: 200px; /* Prevent title from being too wide */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       
-      .list-details p {
-        display: none; /* Hide description text */
-      }
-      
-      .list-status {
+      /* Bottom section: Toggle + Status (positioned at bottom right) */
+      .list-bottom {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        flex-shrink: 0; /* Prevent status from shrinking */
       }
       
       .status-dot {
@@ -378,10 +381,10 @@
       /* Toggle switch */
       .toggle-switch {
         position: relative;
-        width: 48px;
-        height: 24px;
+        width: 36px; /* Smaller width */
+        height: 20px; /* Smaller height */
         background: #404040;
-        border-radius: 12px;
+        border-radius: 10px;
         cursor: pointer;
         transition: all 0.3s ease;
       }
@@ -395,15 +398,15 @@
         position: absolute;
         top: 2px;
         left: 2px;
-        width: 20px;
-        height: 20px;
+        width: 16px; /* Smaller circle */
+        height: 16px; /* Smaller circle */
         background: white;
         border-radius: 50%;
         transition: all 0.3s ease;
       }
       
       .toggle-switch.active::after {
-        left: 26px;
+        left: 20px; /* Adjusted for smaller size */
       }
       
       /* Bottom sync button */
@@ -2122,29 +2125,27 @@
         const div = document.createElement('div');
         div.className = 'list-card';
         
-        // List info section
-        const listInfo = document.createElement('div');
-        listInfo.className = 'list-info';
+        // TOP SECTION: Icon + Title
+        const listTop = document.createElement('div');
+        listTop.className = 'list-top';
         
         // List icon
         const listIcon = document.createElement('div');
         listIcon.className = 'list-icon';
         listIcon.innerHTML = '📋';
         
-        // List details
-        const listDetails = document.createElement('div');
-        listDetails.className = 'list-details';
-        listDetails.innerHTML = `
-          <h4>${list.name}</h4>
-          <p>${isConnected ? 'Sync your project tasks' : 'Click to connect this list'}</p>
-        `;
+        // List title (with truncation for long names)
+        const listTitle = document.createElement('div');
+        listTitle.className = 'list-title';
+        const displayName = list.name.length > 30 ? list.name.substring(0, 30) + '...' : list.name;
+        listTitle.textContent = displayName;
         
-        listInfo.appendChild(listIcon);
-        listInfo.appendChild(listDetails);
+        listTop.appendChild(listIcon);
+        listTop.appendChild(listTitle);
         
-        // Right side status and toggle
-        const listStatus = document.createElement('div');
-        listStatus.className = 'list-status';
+        // BOTTOM SECTION: Toggle + Status (positioned at bottom right)
+        const listBottom = document.createElement('div');
+        listBottom.className = 'list-bottom';
         
         if (isConnected) {
           // Status dot and text
@@ -2160,9 +2161,9 @@
           toggleSwitch.className = `toggle-switch ${isActive ? 'active' : ''}`;
           toggleSwitch.onclick = () => toggleListConnection(list.id);
           
-          listStatus.appendChild(statusDot);
-          listStatus.appendChild(statusText);
-          listStatus.appendChild(toggleSwitch);
+          listBottom.appendChild(statusDot);
+          listBottom.appendChild(statusText);
+          listBottom.appendChild(toggleSwitch);
         } else {
           // Connect button for unconnected lists
           const connectBtn = document.createElement('button');
@@ -2171,11 +2172,11 @@
           connectBtn.textContent = 'Connect';
           connectBtn.onclick = () => addListConnectionFromUnified(list.id);
           
-          listStatus.appendChild(connectBtn);
+          listBottom.appendChild(connectBtn);
         }
         
-        div.appendChild(listInfo);
-        div.appendChild(listStatus);
+        div.appendChild(listTop);
+        div.appendChild(listBottom);
         
         return div;
       }
