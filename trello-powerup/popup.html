@@ -309,6 +309,7 @@
         justify-content: space-between;
         transition: all 0.2s ease;
         border: 1px solid #404040;
+        min-height: 60px; /* Ensure consistent height */
       }
       
       .list-card:hover {
@@ -333,25 +334,25 @@
         align-items: center;
         justify-content: center;
         font-size: 14px;
+        flex-shrink: 0; /* Prevent icon from shrinking */
       }
       
       .list-details h4 {
         font-size: 14px;
         font-weight: 600;
         color: white;
-        margin: 0 0 2px 0;
+        margin: 0; /* Remove bottom margin */
       }
       
       .list-details p {
-        font-size: 12px;
-        color: #9CA3AF;
-        margin: 0;
+        display: none; /* Hide description text */
       }
       
       .list-status {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
+        flex-shrink: 0; /* Prevent status from shrinking */
       }
       
       .status-dot {
@@ -575,7 +576,6 @@
          <div class="header">
            <div class="logo">L</div>
            <div class="title">LinkLoom</div>
-           <div class="subtitle">Trello Integration</div>
            <div class="header-actions">
              <button class="header-btn" onclick="switchTab('syncLists')">Sync Lists</button>
              <button class="header-btn" onclick="switchTab('settings')">Settings</button>
@@ -589,12 +589,7 @@
            <div id="syncListsContent">
              <div class="section-header">
                <h3 class="section-title">Trello Lists</h3>
-               <div style="display: flex; align-items: center; gap: 12px;">
-                 <div class="status-indicator" id="statusIndicator">0/0 connected</div>
-                 <button class="header-btn" onclick="forceRefreshLists()" style="background: #6633CC; border: none; padding: 6px 12px; font-size: 11px;">
-                   🔄 Refresh
-                 </button>
-               </div>
+               <div class="status-indicator" id="statusIndicator">0/0 connected</div>
              </div>
              
              <div id="unifiedListsContainer">
@@ -1973,10 +1968,7 @@
         initializeTabs();
         loadUnifiedContent();
         
-        // Force load lists immediately
-        setTimeout(() => {
-          forceRefreshLists();
-        }, 100);
+        // Lists will load automatically via loadUnifiedContent
       }
       
       function initializeTabs() {
@@ -2014,47 +2006,36 @@
       
       function loadRealListsForUnifiedUI() {
         console.log('🔄 Loading real lists for unified UI...');
-        console.log('🔍 Current workingLists:', workingLists);
         
-        // Force load real lists if we don't have them
-        if (!workingLists || workingLists.length === 0) {
-          console.log('⚠️ No workingLists found, forcing load...');
-          
-          // Try to get lists from localStorage first
-          const trelloData = localStorage.getItem('trello-real-data');
-          if (trelloData) {
-            try {
-              const data = JSON.parse(trelloData);
-              workingLists = data.realLists || [];
-              console.log('📋 Loaded lists from localStorage:', workingLists);
-            } catch (error) {
-              console.error('❌ Error parsing trello-real-data:', error);
-            }
-          }
-          
-          // If still no lists, use fallback
-          if (!workingLists || workingLists.length === 0) {
-            console.log('⚠️ Still no lists, using fallback...');
-            workingLists = [
-              { id: 'todo', name: 'To Do', closed: false },
-              { id: 'doing', name: 'Doing', closed: false },
-              { id: 'done', name: 'Done', closed: false }
-            ];
+        // Always try to get real lists first
+        const trelloData = localStorage.getItem('trello-real-data');
+        if (trelloData) {
+          try {
+            const data = JSON.parse(trelloData);
+            workingLists = data.realLists || [];
+            console.log('📋 Loaded real lists from localStorage:', workingLists);
+          } catch (error) {
+            console.error('❌ Error parsing trello-real-data:', error);
           }
         }
         
-        // Use existing function to get real lists
+        // If no real lists, use fallback
+        if (!workingLists || workingLists.length === 0) {
+          console.log('⚠️ No real lists, using fallback...');
+          workingLists = [
+            { id: 'todo', name: 'To Do', closed: false },
+            { id: 'doing', name: 'Doing', closed: false },
+            { id: 'done', name: 'Done', closed: false }
+          ];
+        }
+        
+        // Populate immediately
+        populateUnifiedListsDisplay();
+        
+        // Also try to refresh real lists in background
         if (typeof refreshRealListsIfPossible === 'function') {
           refreshRealListsIfPossible();
         }
-        
-        // Populate immediately and also after delay
-        populateUnifiedListsDisplay();
-        
-        setTimeout(() => {
-          console.log('⏰ Delayed population - workingLists:', workingLists);
-          populateUnifiedListsDisplay();
-        }, 1000);
       }
       
       // Force refresh lists function
