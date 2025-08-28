@@ -67,12 +67,21 @@ export default function Integrations() {
         const firstLink = links[0]
         const metadata = firstLink.metadata || {}
         
+        console.log('🔍 First link details:', {
+          trello_card_id: firstLink.trello_card_id,
+          metadata: metadata,
+          created_at: firstLink.created_at,
+          updated_at: firstLink.updated_at
+        })
+        
         // Check if this is recent data (within last 24 hours) or old test data
         const linkDate = new Date(firstLink.created_at || firstLink.updated_at || Date.now())
         const now = new Date()
         const hoursDiff = (now.getTime() - linkDate.getTime()) / (1000 * 60 * 60)
         
         console.log('📅 Link age:', hoursDiff.toFixed(1), 'hours old')
+        console.log('📅 Link date:', linkDate.toISOString())
+        console.log('📅 Current time:', now.toISOString())
         
         if (hoursDiff > 24) {
           console.log('⚠️ Data is old (>24h), likely test data. Power-Up not connected.')
@@ -550,6 +559,27 @@ export default function Integrations() {
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Check Database
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={async () => {
+                  console.log('🔍 Checking ALL data in database...')
+                  const { data: allLinks, error } = await supabase
+                    .from('links')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                  
+                  if (error) {
+                    console.error('❌ Error fetching all data:', error)
+                  } else {
+                    console.log('📊 All database data:', allLinks)
+                    console.log('📊 Total links found:', allLinks?.length || 0)
+                  }
+                }}
+                className="border-blue-300 text-blue-700 ml-2"
+              >
+                🔍 Show All Data
               </Button>
               <Button 
                 variant="outline" 
