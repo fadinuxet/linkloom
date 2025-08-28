@@ -9,7 +9,6 @@ import { useLinks } from '../../hooks/useLinks'
 import { 
   Plus, 
   ExternalLink, 
-  Settings, 
   Eye, 
   Copy, 
   Globe,
@@ -31,8 +30,8 @@ interface LinkFormData {
 export default function BioPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { bioPages, updateBioPage, deleteBioPage } = useBioPages()
-  const { links, createLink, updateLink, deleteLink, reorderLinks, togglePin, toggleActive } = useLinks(id || '')
+  const { bioPages, updateBioPage } = useBioPages()
+  const { links, createLink, updateLink, deleteLink, togglePin, toggleActive } = useLinks(id || '')
   
   const [editing, setEditing] = useState(false)
   const [showLinkForm, setShowLinkForm] = useState(false)

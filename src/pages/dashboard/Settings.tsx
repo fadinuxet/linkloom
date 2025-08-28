@@ -6,8 +6,7 @@ import {
   CreditCard, 
   Shield, 
   Download,
-  Trash2,
-  Settings as SettingsIcon
+  Trash2
 } from 'lucide-react'
 
 export default function Settings() {

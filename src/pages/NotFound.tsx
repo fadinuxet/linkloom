@@ -14,13 +14,13 @@ export default function NotFound() {
           The page you're looking for doesn't exist. It might have been moved or deleted.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild variant="hero">
+          <Button variant="hero">
             <Link to="/">
               <Home className="mr-2 h-4 w-4" />
               Go Home
             </Link>
           </Button>
-          <Button asChild variant="outline">
+          <Button variant="outline">
             <Link to="/">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back

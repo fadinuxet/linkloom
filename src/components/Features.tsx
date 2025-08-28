@@ -1,18 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Badge } from './ui/badge'
 import { 
-  Link, 
-  Zap, 
-  Palette, 
   RefreshCw, 
   Globe, 
   BarChart3,
   Trello,
   Settings,
-  Smartphone,
-  Clock,
-  Shield,
-  TrendingUp
+  Smartphone
 } from 'lucide-react'
 
 const features = [

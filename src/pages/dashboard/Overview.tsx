@@ -8,13 +8,9 @@ import { useBioPages } from '../../hooks/useBioPages'
 import { 
   Plus, 
   ExternalLink, 
-  Settings, 
   BarChart3, 
   Zap, 
   Globe, 
-  Calendar,
-  TrendingUp,
-  Users,
   MousePointer
 } from 'lucide-react'
 
@@ -46,9 +42,9 @@ export default function Overview() {
     }
   }
 
-  const totalLinks = bioPages.reduce((sum, page) => sum + (page.links?.length || 0), 0)
+  const totalLinks = bioPages.reduce((sum) => sum + 0, 0) // TODO: Add links property to bio pages
   const publishedPages = bioPages.filter(page => page.is_published).length
-  const totalClicks = bioPages.reduce((sum, page) => sum + (page.total_clicks || 0), 0)
+  const totalClicks = bioPages.reduce((sum) => sum + 0, 0) // TODO: Add total_clicks property to bio pages
 
   if (profileLoading || pagesLoading) {
     return (

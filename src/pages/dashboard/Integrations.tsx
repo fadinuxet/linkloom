@@ -40,19 +40,38 @@ export default function Integrations() {
 
   const checkTrelloIntegration = async () => {
     try {
-      const stored = localStorage.getItem('trello_integration')
-      const token = localStorage.getItem('trello_token')
+      // Check for Power-Up connection data
+      const connectionData = localStorage.getItem('linkloom-connection')
+      const trelloData = localStorage.getItem('trello-real-data')
       
-      if (stored && token) {
-        const integration = JSON.parse(stored)
-        setTrelloIntegration({
-          isConnected: true,
-          boardName: integration.boardName || "Content Calendar",
-          listName: integration.listName || "Published Content",
-          lastSync: integration.lastSync || "Just now",
-          status: "active",
-          isLoading: false
-        })
+      if (connectionData && trelloData) {
+        try {
+          const connection = JSON.parse(connectionData)
+          const trello = JSON.parse(trelloData)
+          
+          // Get list connections info
+          const listConnections = connection.listConnections || []
+          const connectedLists = listConnections.map((conn: any) => conn.listName).join(', ')
+          
+          setTrelloIntegration({
+            isConnected: true,
+            boardName: trello.boardName || connection.boardName || "Content Calendar",
+            listName: connectedLists || "Multiple Lists",
+            lastSync: "Connected via Power-Up",
+            status: "active",
+            isLoading: false
+          })
+        } catch (parseError) {
+          console.error('Error parsing Power-Up data:', parseError)
+          setTrelloIntegration({
+            isConnected: false,
+            boardName: "",
+            listName: "",
+            lastSync: "",
+            status: "disconnected",
+            isLoading: false
+          })
+        }
       } else {
         setTrelloIntegration({
           isConnected: false,
@@ -261,7 +280,7 @@ export default function Integrations() {
         throw new Error('Failed to fetch Trello user info')
       }
       
-      const userData = await userResponse.json()
+              // const userData = await userResponse.json() // TODO: Use user data for personalization
       const boardsResponse = await fetch(`https://api.trello.com/1/members/me/boards?key=${trelloApiKey}&token=${token}`)
       const boards = await boardsResponse.json()
       
@@ -359,6 +378,61 @@ export default function Integrations() {
           Connect your tools to automate your bio links
         </p>
       </div>
+
+      {/* Power-Up Connection Status */}
+      <Card className="mb-6 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">⚡</span>
+              </div>
+              <div>
+                <CardTitle className="text-blue-900 text-xl">Power-Up Connection</CardTitle>
+                <CardDescription className="text-blue-700">
+                  Status of your Trello Power-Up integration
+                </CardDescription>
+              </div>
+            </div>
+            <Badge variant={trelloIntegration.isConnected ? "default" : "outline"} className="bg-blue-100 text-blue-800">
+              {trelloIntegration.isConnected ? "Power-Up Active" : "Power-Up Not Connected"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {trelloIntegration.isConnected ? (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 text-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-700 font-medium">Power-Up is connected and syncing</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-blue-700 font-medium">Board:</span>
+                  <p className="text-blue-600">{trelloIntegration.boardName}</p>
+                </div>
+                <div>
+                  <span className="text-blue-700 font-medium">Lists:</span>
+                  <p className="text-blue-600">{trelloIntegration.listName}</p>
+                </div>
+              </div>
+              <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+                💡 Your Trello cards are automatically syncing to LinkLoom via the Power-Up
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-blue-700 mb-3">
+                To connect, add the LinkLoom Power-Up to your Trello board
+              </p>
+              <Button variant="outline" size="sm" className="border-blue-300 text-blue-700">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                View Power-Up
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Trello Integration */}
       <Card>
@@ -478,10 +552,11 @@ export default function Integrations() {
             <div className="text-center py-8">
               <Trello className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-foreground mb-2">
-                Connect Trello to get started
+                Connect Trello via Power-Up
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                LinkLoom will automatically sync links from your Trello boards and keep your bio page up-to-date.
+                To connect Trello, add the LinkLoom Power-Up to your Trello board. 
+                The Power-Up will automatically sync your cards to LinkLoom.
               </p>
               <div className="relative">
                 <Button 
@@ -757,8 +832,89 @@ export default function Integrations() {
         <li>• Set up automation rules to control which links appear on your bio page</li>
         <li>• Sync every 10 minutes to keep your links fresh and up-to-date</li>
       </ul>
-    </CardContent>
-  </Card>
-</div>
-)
+            </CardContent>
+      </Card>
+
+      {/* Future Integrations */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-foreground mb-6">Coming Soon</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* GitHub Integration */}
+          <Card className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-slate-50">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">🐙</span>
+                </div>
+                <div>
+                  <CardTitle className="text-gray-900">GitHub</CardTitle>
+                  <CardDescription className="text-gray-600">
+                    Sync repositories, issues, and releases
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-4">
+                <Badge variant="outline" className="mb-3">Coming Soon</Badge>
+                <p className="text-sm text-gray-600">
+                  Automatically sync your GitHub projects and documentation
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Notion Integration */}
+          <Card className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-slate-50">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">📝</span>
+                </div>
+                <div>
+                  <CardTitle className="text-gray-900">Notion</CardTitle>
+                  <CardDescription className="text-gray-600">
+                    Sync databases and documentation
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-4">
+                <Badge variant="outline" className="mb-3">Coming Soon</Badge>
+                <p className="text-sm text-gray-600">
+                  Keep your bio links updated from Notion databases
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Airtable Integration */}
+          <Card className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-slate-50">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">📊</span>
+                </div>
+                <div>
+                  <CardTitle className="text-gray-900">Airtable</CardTitle>
+                  <CardDescription className="text-gray-600">
+                    Sync structured content databases
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-4">
+                <Badge variant="outline" className="mb-3">Coming Soon</Badge>
+                <p className="text-sm text-gray-600">
+                  Automate bio links from Airtable content calendars
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
 }

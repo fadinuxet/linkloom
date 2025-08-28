@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
-import { Badge } from '../../components/ui/badge'
+
 import { Switch } from '../../components/ui/switch'
 import { 
   Zap, 
@@ -16,7 +16,7 @@ export default function Automation() {
   const [automationEnabled, setAutomationEnabled] = useState(true)
   
   // Mock automation rules - replace with real state management
-  const [rules, setRules] = useState([
+  const [rules] = useState([
     {
       id: 1,
       name: "Latest Content",

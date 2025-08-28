@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session, AuthError } from '@supabase/supabase-js'
+import { User, Session, AuthError, PostgrestError } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 interface AuthContextType {
@@ -10,7 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>
-  updateProfile: (updates: { display_name?: string; bio?: string; avatar_url?: string }) => Promise<{ error: AuthError | null }>
+  updateProfile: (updates: { display_name?: string; bio?: string; avatar_url?: string }) => Promise<{ error: AuthError | PostgrestError | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
