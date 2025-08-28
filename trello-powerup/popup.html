@@ -1200,8 +1200,8 @@
             throw new Error('No active list connections found to sync');
           }
           
-          // Show success message for multiple lists
-          showSuccessPopup(`${totalCardsSynced} cards synced from ${totalListsSynced} lists.`);
+          // Show success message for connection
+          showSuccessPopup(`Connection successful! Connected to ${currentBoard.name}`);
           
           // Update connection details
           updateConnectionDetails();
@@ -1377,8 +1377,8 @@
           };
           console.log('🔍 DEBUG - Request headers:', requestHeaders);
           
-          // Call your Supabase Edge Function
-                      const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-sync-full`, {
+          // Call the simple connection function
+          const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-connect`, {
             method: 'POST',
             headers: requestHeaders,
             body: JSON.stringify(requestBody)
@@ -1713,17 +1713,47 @@
       
       function disconnectAndReconnect() {
         try {
-          // Don't remove connection data - just hide the connected view
-          console.log('Connection temporarily hidden - data preserved for reconnection');
+          console.log('🔌 Disconnecting and preparing for reconnection...')
           
-          // Show the unified interface instead of old form
-          showUnifiedInterface();
+          // Send disconnect request to backend
+          disconnectFromLinkLoom()
+          
+          // Clear the current connection
+          localStorage.removeItem('linkloom-connection')
+          
+          // Show the unified interface
+          showUnifiedInterface()
           
           // Show reconnection message
-          showStatus('Connection hidden. Your lists are preserved. Connect again to restore.', 'info');
+          showStatus('Disconnected successfully. Connect again to restore your lists.', 'info')
           
         } catch (error) {
-          console.error('Error hiding connection:', error);
+          console.error('Error disconnecting:', error)
+        }
+      }
+
+      async function disconnectFromLinkLoom() {
+        try {
+          const requestBody = {
+            user_id: 'test-user'
+          }
+          
+          const response = await fetch(`${window.LINKLOOM_CONFIG.SUPABASE_URL}/functions/v1/trello-disconnect`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${window.LINKLOOM_CONFIG.SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify(requestBody)
+          })
+
+          if (response.ok) {
+            console.log('✅ Successfully disconnected from LinkLoom')
+          } else {
+            console.log('⚠️ Disconnect request failed, but continuing...')
+          }
+        } catch (error) {
+          console.log('⚠️ Error during disconnect, but continuing...', error)
         }
       }
       
