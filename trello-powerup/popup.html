@@ -1964,24 +1964,13 @@
         // Show unified interface
         document.getElementById('unifiedInterface').classList.remove('hidden');
         
-        // Initialize tabs and content
-        initializeTabs();
+        // Load content directly (no tabs needed)
         loadUnifiedContent();
         
         // Lists will load automatically via loadUnifiedContent
       }
       
-      function initializeTabs() {
-        // Set up tab switching
-        const syncListsTab = document.getElementById('syncListsTab');
-        const settingsTab = document.getElementById('settingsTab');
-        
-        syncListsTab.addEventListener('click', () => switchTab('syncLists'));
-        settingsTab.addEventListener('click', () => switchTab('settings'));
-        
-        // Start with Sync Lists tab
-        switchTab('syncLists');
-      }
+
       
       function switchTab(tabName) {
         // Hide all content
