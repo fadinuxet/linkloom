@@ -196,6 +196,92 @@
       .hidden {
         display: none;
       }
+      
+      /* ========================================
+         NEW UNIFIED INTERFACE STYLES
+         ======================================== */
+      
+      /* Tab styles */
+      .tabs {
+        display: flex;
+        border-bottom: 2px solid #e1e5e9;
+        margin: 0 14px 20px 14px;
+      }
+      
+      .tab-button {
+        background: none;
+        border: none;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #6c757d;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s ease;
+      }
+      
+      .tab-button:hover {
+        color: #0079bf;
+        background: #f8f9fa;
+      }
+      
+      .tab-button.active-tab {
+        color: #0079bf;
+        border-bottom-color: #0079bf;
+        background: #f8f9fa;
+      }
+      
+      /* Tab content */
+      .tab-content {
+        padding: 0 14px;
+      }
+      
+      .tab-pane {
+        min-height: 200px;
+      }
+      
+      /* Unified list items */
+      .unified-list-item {
+        transition: background-color 0.2s ease;
+      }
+      
+      .unified-list-item:hover {
+        background-color: #f8f9fa;
+      }
+      
+      .unified-list-item:last-child {
+        border-bottom: none !important;
+      }
+      
+      /* Form groups in settings */
+      .form-group {
+        margin-bottom: 15px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+        font-size: 12px;
+      }
+      
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #e1e5e9;
+        border-radius: 4px;
+        font-size: 12px;
+        transition: border-color 0.2s ease;
+      }
+      
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #0079bf;
+        box-shadow: 0 0 0 2px rgba(0, 121, 191, 0.1);
+      }
     </style>
   </head>
   <body>
@@ -300,6 +386,78 @@
           <button class="btn" onclick="disconnectAndReconnect()" style="width: 100%; background: #dc3545;">
             Disconnect
           </button>
+        </div>
+      </div>
+
+      <!-- New Unified Interface -->
+      <div id="unifiedInterface" class="hidden">
+        <div class="header">
+          <div class="logo">L</div>
+          <div class="title">LinkLoom Settings</div>
+          <div class="subtitle">Manage your LinkLoom integration</div>
+        </div>
+
+                 <div class="tabs">
+           <button id="syncListsTab" class="tab-button active-tab">Sync Lists</button>
+           <button id="settingsTab" class="tab-button">Settings</button>
+         </div>
+         
+         <!-- Status display for unified interface -->
+         <div id="unifiedStatus" class="status hidden" style="margin: 0 14px 15px 14px;"></div>
+
+                 <div class="tab-content">
+           <div id="syncListsContent" class="tab-pane">
+             <h4 style="margin: 10px 0; color: #333; font-size: 14px;">📋 Trello Lists</h4>
+             <div id="unifiedListsContainer" style="max-height: 200px; overflow-y: auto; border: 1px solid #e1e5e9; border-radius: 4px; padding: 8px;">
+               <!-- Lists will be populated here -->
+             </div>
+             <div class="btn-container" style="margin-top: 15px;">
+               <button class="btn" onclick="syncAllActiveLists()" style="width: 100%; background: #28a745; font-size: 12px;">
+                 🔄 Sync All Active Lists
+               </button>
+             </div>
+           </div>
+
+          <div id="settingsContent" class="tab-pane">
+            <h4 style="margin: 10px 0; color: #333; font-size: 14px;">⚙️ Settings</h4>
+            <div class="form-group">
+              <label for="unifiedLinkloomUrl" class="required">LinkLoom URL</label>
+              <input 
+                type="url" 
+                id="unifiedLinkloomUrl" 
+                placeholder="https://yourname.linkloom.com"
+                value="https://fadi.linklom.com"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="unifiedSyncRule" class="required">Sync Rule</label>
+              <select id="unifiedSyncRule" required>
+                <option value="latest">Latest cards</option>
+                <option value="pinned">Pinned cards only</option>
+                <option value="all">All cards</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="unifiedCardLimit" class="required">Card Limit</label>
+              <input 
+                type="number" 
+                id="unifiedCardLimit" 
+                min="1" 
+                max="50" 
+                value="10"
+                required
+              />
+            </div>
+
+            <div class="btn-container" style="margin-top: 15px;">
+              <button class="btn" onclick="saveUnifiedSettings()" style="width: 100%; background: #667eea; font-size: 12px;">
+                Save Settings
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -430,7 +588,7 @@
         if (connectionData) {
           try {
             const connection = JSON.parse(connectionData);
-            console.log('✅ EXISTING CONNECTION FOUND! Showing already connected view...');
+            console.log('✅ EXISTING CONNECTION FOUND! Showing unified interface...');
             
             // Set current board
             currentBoard = { 
@@ -438,15 +596,15 @@
               name: connection.boardName || 'Your Trello Board' 
             };
             
-            // Show already connected view immediately
-            showAlreadyConnected();
+            // Show unified interface instead of old separate screens
+            showUnifiedInterface();
           } catch (error) {
             console.log('❌ Error parsing connection data:', error);
-            showConnectionForm();
+            showUnifiedInterface();
           }
         } else {
-          // No existing connection, show connection form
-          showConnectionForm();
+          // No existing connection, show unified interface
+          showUnifiedInterface();
         }
       }
 
@@ -949,11 +1107,32 @@
         }
       }
 
-      function showStatus(message, type) {
-        const status = document.getElementById('status');
-        status.textContent = message;
-        status.className = `status ${type}`;
-        status.classList.remove('hidden');
+      function showStatus(message, type = 'info') {
+        // Show status in both old and new interfaces
+        const statusElement = document.getElementById('status');
+        const unifiedStatusElement = document.getElementById('unifiedStatus');
+        
+        if (statusElement) {
+          statusElement.textContent = message;
+          statusElement.className = `status ${type}`;
+          statusElement.classList.remove('hidden');
+          
+          // Auto-hide after 5 seconds
+          setTimeout(() => {
+            statusElement.classList.add('hidden');
+          }, 5000);
+        }
+        
+        if (unifiedStatusElement) {
+          unifiedStatusElement.textContent = message;
+          unifiedStatusElement.className = `status ${type}`;
+          unifiedStatusElement.classList.remove('hidden');
+          
+          // Auto-hide after 5 seconds
+          setTimeout(() => {
+            unifiedStatusElement.classList.add('hidden');
+          }, 5000);
+        }
       }
       
       function updateConnectionDetails() {
@@ -1105,23 +1284,15 @@
       }
 
       function showAlreadyConnected() {
-        document.getElementById('connectionForm').classList.add('hidden');
-        document.getElementById('status').classList.add('hidden');
-        document.getElementById('alreadyConnected').classList.remove('hidden');
-        
-        // Debug: Log connection data
-        const connection = JSON.parse(localStorage.getItem('linkloom-connection') || '{}');
-        console.log('🔍 DEBUG - Connection data when showing already connected:', connection);
-        console.log('🔍 DEBUG - List connections count:', connection.listConnections?.length || 0);
-        
-        // Show connection details
-        updateConnectionDetails();
-        
-        // Populate list connections
-        populateListConnections();
-        
-        // Try to refresh real lists if we have a token
-        refreshRealListsIfPossible();
+        try {
+          console.log('🔄 Showing already connected view...');
+          
+          // Show unified interface instead of old separate screens
+          showUnifiedInterface();
+          
+        } catch (error) {
+          console.error('Error showing already connected view:', error);
+        }
       }
       
       async function refreshRealListsIfPossible() {
@@ -1222,8 +1393,8 @@
           // Don't remove connection data - just hide the connected view
           console.log('Connection temporarily hidden - data preserved for reconnection');
           
-          // Show the connection form WITHOUT auto-restore
-          showConnectionFormOnly();
+          // Show the unified interface instead of old form
+          showUnifiedInterface();
           
           // Show reconnection message
           showStatus('Connection hidden. Your lists are preserved. Connect again to restore.', 'info');
@@ -1266,20 +1437,13 @@
       }
       
       function showConnectionForm() {
-        // This function shows the connection form and auto-restores if there's previous data
-        document.getElementById('alreadyConnected').classList.add('hidden');
-        document.getElementById('connectionForm').classList.remove('hidden');
-        document.getElementById('status').classList.remove('hidden');
-        
-        // Auto-restore previous connection when form is manually shown
-        autoRestoreOnConnectionForm();
+        // This function now shows the unified interface
+        showUnifiedInterface();
       }
       
       function showConnectionFormOnly() {
-        // This function shows the connection form WITHOUT auto-restore (used after disconnect)
-        document.getElementById('alreadyConnected').classList.add('hidden');
-        document.getElementById('connectionForm').classList.remove('hidden');
-        document.getElementById('status').classList.remove('hidden');
+        // This function now shows the unified interface
+        showUnifiedInterface();
       }
       
       function autoRestoreConnection() {
@@ -1552,10 +1716,8 @@
         // Save updated connection
         localStorage.setItem('linkloom-connection', JSON.stringify(connection));
         
-        // Update UI
-        updateConnectionDetails();
-        populateListConnections();
-        populateAddListDropdown(); // Refresh the dropdown
+        // Update unified interface
+        populateUnifiedListsDisplay();
         showStatus('List connection removed', 'success');
       }
       
@@ -1571,9 +1733,8 @@
           // Save updated connection
           localStorage.setItem('linkloom-connection', JSON.stringify(connection));
           
-          // Update UI
-          updateConnectionDetails();
-          populateListConnections();
+          // Update unified interface
+          populateUnifiedListsDisplay();
           showStatus(`List "${listConn.listName}" ${listConn.isActive ? 'activated' : 'deactivated'}`, 'success');
         }
       }
@@ -1603,6 +1764,270 @@
           console.error('Test function error:', error);
           showStatus('Test failed: ' + error.message, 'error');
         }
+      }
+
+      // ========================================
+      // NEW UNIFIED UI FUNCTIONS (Phase 1)
+      // ========================================
+      
+      function showUnifiedInterface() {
+        // Hide all existing views
+        document.getElementById('connectionForm').classList.add('hidden');
+        document.getElementById('alreadyConnected').classList.add('hidden');
+        document.getElementById('status').classList.add('hidden');
+        
+        // Show unified interface
+        document.getElementById('unifiedInterface').classList.remove('hidden');
+        
+        // Initialize tabs and content
+        initializeTabs();
+        loadUnifiedContent();
+      }
+      
+      function initializeTabs() {
+        // Set up tab switching
+        const syncListsTab = document.getElementById('syncListsTab');
+        const settingsTab = document.getElementById('settingsTab');
+        
+        syncListsTab.addEventListener('click', () => switchTab('syncLists'));
+        settingsTab.addEventListener('click', () => switchTab('settings'));
+        
+        // Start with Sync Lists tab
+        switchTab('syncLists');
+      }
+      
+      function switchTab(tabName) {
+        // Hide all tab content
+        document.getElementById('syncListsContent').classList.add('hidden');
+        document.getElementById('settingsContent').classList.add('hidden');
+        
+        // Remove active class from all tabs
+        document.getElementById('syncListsTab').classList.remove('active-tab');
+        document.getElementById('settingsTab').classList.remove('active-tab');
+        
+        // Show selected tab content and mark as active
+        if (tabName === 'syncLists') {
+          document.getElementById('syncListsContent').classList.remove('hidden');
+          document.getElementById('syncListsTab').classList.add('active-tab');
+        } else if (tabName === 'settings') {
+          document.getElementById('settingsContent').classList.remove('hidden');
+          document.getElementById('settingsTab').classList.add('active-tab');
+        }
+      }
+      
+      function loadUnifiedContent() {
+        // Load real Trello lists for the Sync Lists tab
+        loadRealListsForUnifiedUI();
+        
+        // Load settings for the Settings tab
+        loadSettingsForUnifiedUI();
+      }
+      
+      function loadRealListsForUnifiedUI() {
+        // Use existing function to get real lists
+        if (typeof refreshRealListsIfPossible === 'function') {
+          refreshRealListsIfPossible();
+        }
+        
+        // Populate the unified lists display
+        populateUnifiedListsDisplay();
+      }
+      
+      function populateUnifiedListsDisplay() {
+        const listsContainer = document.getElementById('unifiedListsContainer');
+        if (!listsContainer) return;
+        
+        // Get current connection data
+        const connectionData = localStorage.getItem('linkloom-connection');
+        let currentConnections = [];
+        
+        if (connectionData) {
+          try {
+            const connection = JSON.parse(connectionData);
+            currentConnections = connection.listConnections || [];
+          } catch (error) {
+            console.error('Error parsing connection data:', error);
+          }
+        }
+        
+        // Clear container
+        listsContainer.innerHTML = '';
+        
+        // Add each list with Active/Inactive toggle and disconnect button
+        if (workingLists && workingLists.length > 0) {
+          workingLists.forEach(list => {
+            const isConnected = currentConnections.find(conn => conn.listId === list.id);
+            const isActive = isConnected ? isConnected.isActive : false;
+            
+            const listElement = createUnifiedListElement(list, isConnected, isActive);
+            listsContainer.appendChild(listElement);
+          });
+        } else {
+          listsContainer.innerHTML = '<p class="text-center text-muted">Loading lists...</p>';
+        }
+      }
+      
+      function createUnifiedListElement(list, isConnected, isActive) {
+        const div = document.createElement('div');
+        div.className = 'unified-list-item';
+        div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e1e5e9;';
+        
+        // List name and icon
+        const listInfo = document.createElement('div');
+        listInfo.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        listInfo.innerHTML = `
+          <span style="color: #0079bf;">🔗</span>
+          <span style="font-weight: 500;">${list.name}</span>
+        `;
+        
+        // Right side buttons container
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        
+        if (isConnected) {
+          // Active/Inactive toggle for connected lists
+          const toggleButton = document.createElement('button');
+          toggleButton.className = 'btn';
+          toggleButton.style.cssText = 'padding: 6px 12px; font-size: 12px;';
+          toggleButton.textContent = isActive ? '● Active' : '○ Inactive';
+          toggleButton.style.background = isActive ? '#28a745' : '#6c757d';
+          toggleButton.onclick = () => toggleListConnection(list.id);
+          
+          // Disconnect button
+          const disconnectBtn = document.createElement('button');
+          disconnectBtn.className = 'btn';
+          disconnectBtn.style.cssText = 'padding: 6px 8px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;';
+          disconnectBtn.innerHTML = '❌';
+          disconnectBtn.onclick = () => removeListConnection(list.id);
+          
+          buttonsContainer.appendChild(toggleButton);
+          buttonsContainer.appendChild(disconnectBtn);
+        } else {
+          // Connect button for unconnected lists
+          const connectBtn = document.createElement('button');
+          connectBtn.className = 'btn';
+          connectBtn.style.cssText = 'padding: 6px 12px; font-size: 12px; background: #0079bf; color: white; border: none; border-radius: 4px; cursor: pointer;';
+          connectBtn.textContent = 'Connect';
+          connectBtn.onclick = () => addListConnectionFromUnified(list.id);
+          
+          buttonsContainer.appendChild(connectBtn);
+        }
+        
+        div.appendChild(listInfo);
+        div.appendChild(buttonsContainer);
+        
+        return div;
+      }
+      
+      function loadSettingsForUnifiedUI() {
+        // Load current settings from localStorage
+        const connectionData = localStorage.getItem('linkloom-connection');
+        if (connectionData) {
+          try {
+            const connection = JSON.parse(connectionData);
+            
+            // Update form fields
+            const urlField = document.getElementById('unifiedLinkloomUrl');
+            const limitField = document.getElementById('unifiedCardLimit');
+            const ruleField = document.getElementById('unifiedSyncRule');
+            
+            if (urlField) urlField.value = connection.linkloomUrl || 'https://fadi.linklom.com';
+            if (limitField) limitField.value = connection.cardLimit || '10';
+            if (ruleField) ruleField.value = connection.syncRule || 'latest';
+          } catch (error) {
+            console.error('Error loading settings:', error);
+          }
+        }
+      }
+      
+      function saveUnifiedSettings() {
+        // Save settings using existing logic
+        const urlField = document.getElementById('unifiedLinkloomUrl');
+        const limitField = document.getElementById('unifiedCardLimit');
+        const ruleField = document.getElementById('unifiedSyncRule');
+        
+        if (urlField && limitField && ruleField) {
+          // Use existing save logic
+          const connectionData = localStorage.getItem('linkloom-connection');
+          if (connectionData) {
+            try {
+              const connection = JSON.parse(connectionData);
+              connection.linkloomUrl = urlField.value;
+              connection.cardLimit = limitField.value;
+              connection.syncRule = ruleField.value;
+              
+              localStorage.setItem('linkloom-connection', JSON.stringify(connection));
+              showStatus('Settings saved successfully!', 'success');
+            } catch (error) {
+              console.error('Error saving settings:', error);
+              showStatus('Failed to save settings', 'error');
+            }
+          }
+        }
+      }
+      
+      function syncAllActiveLists() {
+        // Use existing sync logic for all active lists
+        const connectionData = localStorage.getItem('linkloom-connection');
+        if (connectionData) {
+          try {
+            const connection = JSON.parse(connectionData);
+            if (connection.listConnections && connection.listConnections.length > 0) {
+              const activeLists = connection.listConnections.filter(conn => conn.isActive);
+              if (activeLists.length > 0) {
+                console.log('🔄 Syncing all active lists:', activeLists.length);
+                // Use existing sync logic
+                syncAgain();
+              } else {
+                showStatus('No active lists to sync', 'info');
+              }
+            } else {
+              showStatus('No lists connected', 'info');
+            }
+          } catch (error) {
+            console.error('Error during sync:', error);
+            showStatus('Sync failed', 'error');
+          }
+        } else {
+          showStatus('No connection found', 'error');
+        }
+      }
+      
+      function addListConnectionFromUnified(listId) {
+        // Add a new list connection from the unified interface
+        const selectedList = workingLists.find(list => list.id === listId);
+        
+        if (!selectedList) {
+          showStatus('List not found', 'error');
+          return;
+        }
+        
+        // Get current connection
+        const connection = JSON.parse(localStorage.getItem('linkloom-connection'));
+        if (!connection.listConnections) {
+          connection.listConnections = [];
+        }
+        
+        // Check if list is already connected
+        const alreadyConnected = connection.listConnections.find(conn => conn.listId === listId);
+        if (alreadyConnected) {
+          showStatus(`List "${selectedList.name}" is already connected`, 'error');
+          return;
+        }
+        
+        // Add new list connection
+        connection.listConnections.push({
+          listId: listId,
+          listName: selectedList.name,
+          isActive: true
+        });
+        
+        // Save updated connection
+        localStorage.setItem('linkloom-connection', JSON.stringify(connection));
+        
+        // Update unified interface
+        populateUnifiedListsDisplay();
+        showStatus(`List "${selectedList.name}" added successfully`, 'success');
       }
     </script>
   </body>
