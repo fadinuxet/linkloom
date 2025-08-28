@@ -198,122 +198,274 @@
       }
       
       /* ========================================
-         NEW UNIFIED INTERFACE STYLES
+         BEAUTIFUL DARK THEME DESIGN
          ======================================== */
       
-      /* Tab styles */
-      .tabs {
-        display: flex;
-        border-bottom: 2px solid #e1e5e9;
-        margin: 0 14px 20px 14px;
-        background: #f8f9fa;
-        border-radius: 8px 8px 0 0;
-        padding: 0 8px;
+      /* Dark theme base */
+      #unifiedInterface {
+        background: #1A1A1A;
+        color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
       }
       
-      .tab-button {
-        background: none;
+      /* Purple header section */
+      .header {
+        background: linear-gradient(135deg, #6633CC 0%, #7C3AED 100%);
+        padding: 24px 20px;
+        text-align: center;
+        position: relative;
+      }
+      
+      .header .logo {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 28px;
+        font-weight: bold;
+        color: white;
+      }
+      
+      .header .title {
+        font-size: 28px;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 8px;
+      }
+      
+      .header .subtitle {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 24px;
+      }
+      
+      /* Header action buttons */
+      .header-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+      }
+      
+      .header-btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+      }
+      
+      .header-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-1px);
+      }
+      
+      /* Main content area */
+      .main-content {
+        background: #1A1A1A;
+        padding: 24px 20px;
+      }
+      
+      /* Section header */
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      
+      .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: white;
+      }
+      
+      .status-indicator {
+        font-size: 14px;
+        color: #9CA3AF;
+        background: #262626;
+        padding: 6px 12px;
+        border-radius: 20px;
+      }
+      
+      /* List cards */
+      .list-card {
+        background: #262626;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+        border: 1px solid #404040;
+      }
+      
+      .list-card:hover {
+        border-color: #6633CC;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 51, 204, 0.15);
+      }
+      
+      .list-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+      }
+      
+      .list-icon {
+        width: 40px;
+        height: 40px;
+        background: #404040;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      
+      .list-details h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        margin: 0 0 4px 0;
+      }
+      
+      .list-details p {
+        font-size: 14px;
+        color: #9CA3AF;
+        margin: 0;
+      }
+      
+      .list-status {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #9CA3AF;
+      }
+      
+      .status-dot.active {
+        background: #10B981;
+      }
+      
+      .status-text {
+        font-size: 12px;
+        color: #9CA3AF;
+      }
+      
+      .status-text.active {
+        color: #10B981;
+      }
+      
+      /* Toggle switch */
+      .toggle-switch {
+        position: relative;
+        width: 48px;
+        height: 24px;
+        background: #404040;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .toggle-switch.active {
+        background: #10B981;
+      }
+      
+      .toggle-switch::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+      
+      .toggle-switch.active::after {
+        left: 26px;
+      }
+      
+      /* Bottom sync button */
+      .sync-button {
+        background: #10B981;
+        color: white;
         border: none;
         padding: 16px 24px;
-        font-size: 14px;
+        border-radius: 12px;
+        font-size: 16px;
         font-weight: 600;
-        color: #6c757d;
         cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s ease;
-        border-radius: 8px 8px 0 0;
-        margin: 0 4px;
-      }
-      
-      .tab-button:hover {
-        color: #0079bf;
-        background: #e3f2fd;
-        transform: translateY(-2px);
-      }
-      
-      .tab-button.active-tab {
-        color: #0079bf;
-        border-bottom-color: #0079bf;
-        background: #fff;
-        box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
-      }
-      
-      /* Tab content */
-      .tab-content {
-        padding: 0 14px;
-      }
-      
-      .tab-pane {
-        min-height: 200px;
-      }
-      
-      /* Unified list items */
-      .unified-list-item {
-        transition: background-color 0.2s ease;
-      }
-      
-      .unified-list-item:hover {
-        background-color: #f8f9fa;
-      }
-      
-      .unified-list-item:last-child {
-        border-bottom: none !important;
-      }
-      
-      /* Improved unified list items */
-      .unified-list-item {
         transition: all 0.2s ease;
-        border-radius: 8px;
-        margin: 8px 0;
-        padding: 16px 12px;
+        width: 100%;
+        margin-top: 24px;
       }
       
-      .unified-list-item:hover {
-        background-color: #f8f9fa;
+      .sync-button:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
       }
       
-      /* Unified button styles */
-      .unified-btn {
-        transition: background-color 0.2s ease;
+      /* Settings tab styling */
+      .settings-content {
+        background: #262626;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 16px;
       }
       
-      .unified-btn:hover {
-        opacity: 0.9;
-      }
-      
-      /* Main button hover effects */
-      .btn-container .btn:hover {
-        opacity: 0.9;
-      }
-      
-      /* Form groups in settings */
-      .form-group {
-        margin-bottom: 15px;
+      .settings-content h4 {
+        color: white;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 600;
       }
       
       .form-group label {
-        display: block;
-        margin-bottom: 5px;
+        color: #D1D5DB;
         font-weight: 500;
-        color: #333;
-        font-size: 12px;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 14px;
       }
       
       .form-group input,
       .form-group select {
+        background: #404040;
+        border: 1px solid #525252;
+        color: white;
+        border-radius: 8px;
+        padding: 12px 16px;
         width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #e1e5e9;
-        border-radius: 4px;
-        font-size: 12px;
+        font-size: 14px;
         transition: border-color 0.2s ease;
       }
       
       .form-group input:focus,
       .form-group select:focus {
+        border-color: #6633CC;
+        box-shadow: 0 0 0 3px rgba(102, 51, 204, 0.1);
         outline: none;
-        border-color: #0079bf;
-        box-shadow: 0 0 0 2px rgba(0, 121, 191, 0.1);
       }
     </style>
   </head>
@@ -422,77 +574,79 @@
         </div>
       </div>
 
-             <!-- New Unified Interface -->
+                    <!-- Beautiful Dark Theme Interface -->
        <div id="unifiedInterface" class="hidden">
          <div class="header">
            <div class="logo">L</div>
            <div class="title">LinkLoom</div>
            <div class="subtitle">Trello Integration</div>
+           <div class="header-actions">
+             <button class="header-btn" onclick="switchTab('syncLists')">Sync Lists</button>
+             <button class="header-btn" onclick="switchTab('settings')">Settings</button>
+           </div>
          </div>
-
-                 <div class="tabs">
-           <button id="syncListsTab" class="tab-button active-tab">Sync Lists</button>
-           <button id="settingsTab" class="tab-button">Settings</button>
-         </div>
-         
+ 
          <!-- Status display for unified interface -->
-         <div id="unifiedStatus" class="status hidden" style="margin: 0 14px 15px 14px;"></div>
-
-                 <div class="tab-content">
-           <div id="syncListsContent" class="tab-pane">
-             <h4 style="margin: 10px 0; color: #333; font-size: 14px;">📋 Trello Lists</h4>
-             <div id="unifiedListsContainer" style="max-height: 200px; overflow-y: auto; border: 1px solid #e1e5e9; border-radius: 8px; padding: 16px; background: #fff;">
+         <div id="unifiedStatus" class="status hidden" style="margin: 0 20px 20px 20px;"></div>
+ 
+         <div class="main-content">
+           <div id="syncListsContent">
+             <div class="section-header">
+               <h3 class="section-title">Trello Lists</h3>
+               <div class="status-indicator" id="statusIndicator">0/0 connected</div>
+             </div>
+             
+             <div id="unifiedListsContainer">
                <!-- Lists will be populated here -->
              </div>
-             <div class="btn-container" style="margin-top: 20px;">
-               <button class="btn" onclick="syncAllActiveLists()" style="width: 100%; background: #28a745; font-size: 15px; font-weight: 600; padding: 16px 24px; border: none; border-radius: 8px; color: white; transition: all 0.3s ease;">
-                 🔄 Sync All Active Lists
-               </button>
-             </div>
+             
+             <button class="sync-button" onclick="syncAllActiveLists()">
+               🔄 Sync Active Lists
+             </button>
            </div>
-
-          <div id="settingsContent" class="tab-pane">
-            <h4 style="margin: 10px 0; color: #333; font-size: 14px;">⚙️ Settings</h4>
-            <div class="form-group">
-              <label for="unifiedLinkloomUrl" class="required">LinkLoom URL</label>
-              <input 
-                type="url" 
-                id="unifiedLinkloomUrl" 
-                placeholder="https://yourname.linkloom.com"
-                value="https://fadi.linklom.com"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="unifiedSyncRule" class="required">Sync Rule</label>
-              <select id="unifiedSyncRule" required>
-                <option value="latest">Latest cards</option>
-                <option value="pinned">Pinned cards only</option>
-                <option value="all">All cards</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="unifiedCardLimit" class="required">Card Limit</label>
-              <input 
-                type="number" 
-                id="unifiedCardLimit" 
-                min="1" 
-                max="50" 
-                value="10"
-                required
-              />
-            </div>
-
-                         <div class="btn-container" style="margin-top: 20px;">
-               <button class="btn" onclick="saveUnifiedSettings()" style="width: 100%; background: #667eea; font-size: 15px; font-weight: 600; padding: 16px 24px; border: none; border-radius: 8px; color: white; transition: all 0.3s ease;">
+ 
+           <div id="settingsContent" class="hidden">
+             <div class="settings-content">
+               <h4>⚙️ Settings</h4>
+               <div class="form-group">
+                 <label for="unifiedLinkloomUrl">LinkLoom URL</label>
+                 <input 
+                   type="url" 
+                   id="unifiedLinkloomUrl" 
+                   placeholder="https://yourname.linkloom.com"
+                   value="https://fadi.linklom.com"
+                   required
+                 />
+               </div>
+ 
+               <div class="form-group">
+                 <label for="unifiedSyncRule">Sync Rule</label>
+                 <select id="unifiedSyncRule" required>
+                   <option value="latest">Latest cards</option>
+                   <option value="pinned">Pinned cards only</option>
+                   <option value="all">All cards</option>
+                 </select>
+               </div>
+ 
+               <div class="form-group">
+                 <label for="unifiedCardLimit">Card Limit</label>
+                 <input 
+                   type="number" 
+                   id="unifiedCardLimit" 
+                   min="1" 
+                   max="50" 
+                   value="10"
+                   required
+                 />
+               </div>
+ 
+               <button class="sync-button" onclick="saveUnifiedSettings()" style="background: #6633CC;">
                  Save Settings
                </button>
              </div>
-          </div>
-        </div>
-      </div>
+           </div>
+         </div>
+       </div>
     </div>
 
     <script>
@@ -1830,21 +1984,15 @@
       }
       
       function switchTab(tabName) {
-        // Hide all tab content
+        // Hide all content
         document.getElementById('syncListsContent').classList.add('hidden');
         document.getElementById('settingsContent').classList.add('hidden');
         
-        // Remove active class from all tabs
-        document.getElementById('syncListsTab').classList.remove('active-tab');
-        document.getElementById('settingsTab').classList.remove('active-tab');
-        
-        // Show selected tab content and mark as active
+        // Show selected content
         if (tabName === 'syncLists') {
           document.getElementById('syncListsContent').classList.remove('hidden');
-          document.getElementById('syncListsTab').classList.add('active-tab');
         } else if (tabName === 'settings') {
           document.getElementById('settingsContent').classList.remove('hidden');
-          document.getElementById('settingsTab').classList.add('active-tab');
         }
       }
       
@@ -1868,6 +2016,7 @@
       
       function populateUnifiedListsDisplay() {
         const listsContainer = document.getElementById('unifiedListsContainer');
+        const statusIndicator = document.getElementById('statusIndicator');
         if (!listsContainer) return;
         
         // Get current connection data
@@ -1883,10 +2032,17 @@
           }
         }
         
+        // Update status indicator
+        if (statusIndicator) {
+          const activeCount = currentConnections.filter(conn => conn.isActive).length;
+          const totalCount = workingLists ? workingLists.length : 0;
+          statusIndicator.textContent = `${activeCount}/${totalCount} connected`;
+        }
+        
         // Clear container
         listsContainer.innerHTML = '';
         
-        // Add each list with Active/Inactive toggle and disconnect button
+        // Add each list with beautiful card design
         if (workingLists && workingLists.length > 0) {
           workingLists.forEach(list => {
             const isConnected = currentConnections.find(conn => conn.listId === list.id);
@@ -1896,59 +2052,68 @@
             listsContainer.appendChild(listElement);
           });
         } else {
-          listsContainer.innerHTML = '<p class="text-center text-muted">Loading lists...</p>';
+          listsContainer.innerHTML = '<p style="text-align: center; color: #9CA3AF; padding: 40px;">Loading lists...</p>';
         }
       }
       
-      function createUnifiedListElement(list, isConnected, isActive) {
+            function createUnifiedListElement(list, isConnected, isActive) {
         const div = document.createElement('div');
-        div.className = 'unified-list-item';
-        div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e1e5e9;';
+        div.className = 'list-card';
         
-        // List name and icon
+        // List info section
         const listInfo = document.createElement('div');
-        listInfo.style.cssText = 'display: flex; align-items: center; gap: 8px;';
-        listInfo.innerHTML = `
-          <span style="color: #0079bf;">🔗</span>
-          <span style="font-weight: 500;">${list.name}</span>
+        listInfo.className = 'list-info';
+        
+        // List icon
+        const listIcon = document.createElement('div');
+        listIcon.className = 'list-icon';
+        listIcon.innerHTML = '📋';
+        
+        // List details
+        const listDetails = document.createElement('div');
+        listDetails.className = 'list-details';
+        listDetails.innerHTML = `
+          <h4>${list.name}</h4>
+          <p>${isConnected ? 'Sync your project tasks' : 'Click to connect this list'}</p>
         `;
         
-                 // Right side buttons container
-         const buttonsContainer = document.createElement('div');
-         buttonsContainer.style.cssText = 'display: flex; align-items: center; gap: 12px;';
+        listInfo.appendChild(listIcon);
+        listInfo.appendChild(listDetails);
         
-                 if (isConnected) {
-           // Active/Inactive toggle for connected lists
-           const toggleButton = document.createElement('button');
-           toggleButton.className = 'btn unified-btn';
-           toggleButton.style.cssText = 'padding: 12px 20px; font-size: 13px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; min-width: 100px; height: 40px; display: flex; align-items: center; justify-content: center; gap: 8px;';
-           toggleButton.innerHTML = isActive ? '<span style="color: #fff; font-size: 16px;">●</span> Active' : '<span style="color: #fff; font-size: 16px;">○</span> Inactive';
-           toggleButton.style.background = isActive ? '#28a745' : '#6c757d';
-           toggleButton.style.color = '#fff';
-           toggleButton.onclick = () => toggleListConnection(list.id);
-           
-           // Disconnect button
-           const disconnectBtn = document.createElement('button');
-           disconnectBtn.className = 'btn unified-btn';
-           disconnectBtn.style.cssText = 'padding: 12px 20px; font-size: 13px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; min-width: 100px; height: 40px; display: flex; align-items: center; justify-content: center; background: #dc3545; color: white;';
-           disconnectBtn.innerHTML = '<span style="font-size: 16px;">Disconnect</span>';
-           disconnectBtn.onclick = () => removeListConnection(list.id);
-           
-           buttonsContainer.appendChild(toggleButton);
-           buttonsContainer.appendChild(disconnectBtn);
-         } else {
-           // Connect button for unconnected lists
-           const connectBtn = document.createElement('button');
-           connectBtn.className = 'btn unified-btn';
-           connectBtn.style.cssText = 'padding: 12px 20px; font-size: 13px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; min-width: 100px; height: 40px; display: flex; align-items: center; justify-content: center; background: #0079bf; color: white;';
-           connectBtn.textContent = 'Connect';
-           connectBtn.onclick = () => addListConnectionFromUnified(list.id);
-           
-           buttonsContainer.appendChild(connectBtn);
-         }
+        // Right side status and toggle
+        const listStatus = document.createElement('div');
+        listStatus.className = 'list-status';
+        
+        if (isConnected) {
+          // Status dot and text
+          const statusDot = document.createElement('div');
+          statusDot.className = `status-dot ${isActive ? 'active' : ''}`;
+          
+          const statusText = document.createElement('div');
+          statusText.className = `status-text ${isActive ? 'active' : ''}`;
+          statusText.textContent = isActive ? 'Active' : 'Inactive';
+          
+          // Toggle switch
+          const toggleSwitch = document.createElement('div');
+          toggleSwitch.className = `toggle-switch ${isActive ? 'active' : ''}`;
+          toggleSwitch.onclick = () => toggleListConnection(list.id);
+          
+          listStatus.appendChild(statusDot);
+          listStatus.appendChild(statusText);
+          listStatus.appendChild(toggleSwitch);
+        } else {
+          // Connect button for unconnected lists
+          const connectBtn = document.createElement('button');
+          connectBtn.className = 'header-btn';
+          connectBtn.style.cssText = 'background: #6633CC; border: none; padding: 8px 16px; font-size: 12px;';
+          connectBtn.textContent = 'Connect';
+          connectBtn.onclick = () => addListConnectionFromUnified(list.id);
+          
+          listStatus.appendChild(connectBtn);
+        }
         
         div.appendChild(listInfo);
-        div.appendChild(buttonsContainer);
+        div.appendChild(listStatus);
         
         return div;
       }
