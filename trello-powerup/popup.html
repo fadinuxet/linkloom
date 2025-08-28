@@ -589,7 +589,12 @@
            <div id="syncListsContent">
              <div class="section-header">
                <h3 class="section-title">Trello Lists</h3>
-               <div class="status-indicator" id="statusIndicator">0/0 connected</div>
+               <div style="display: flex; align-items: center; gap: 12px;">
+                 <div class="status-indicator" id="statusIndicator">0/0 connected</div>
+                 <button class="header-btn" onclick="forceRefreshLists()" style="background: #6633CC; border: none; padding: 6px 12px; font-size: 11px;">
+                   🔄 Refresh
+                 </button>
+               </div>
              </div>
              
              <div id="unifiedListsContainer">
@@ -1954,6 +1959,8 @@
       // ========================================
       
       function showUnifiedInterface() {
+        console.log('🔄 Showing unified interface...');
+        
         // Hide all existing views
         document.getElementById('connectionForm').classList.add('hidden');
         document.getElementById('alreadyConnected').classList.add('hidden');
@@ -1965,6 +1972,11 @@
         // Initialize tabs and content
         initializeTabs();
         loadUnifiedContent();
+        
+        // Force load lists immediately
+        setTimeout(() => {
+          forceRefreshLists();
+        }, 100);
       }
       
       function initializeTabs() {
@@ -2004,16 +2016,94 @@
         console.log('🔄 Loading real lists for unified UI...');
         console.log('🔍 Current workingLists:', workingLists);
         
+        // Force load real lists if we don't have them
+        if (!workingLists || workingLists.length === 0) {
+          console.log('⚠️ No workingLists found, forcing load...');
+          
+          // Try to get lists from localStorage first
+          const trelloData = localStorage.getItem('trello-real-data');
+          if (trelloData) {
+            try {
+              const data = JSON.parse(trelloData);
+              workingLists = data.realLists || [];
+              console.log('📋 Loaded lists from localStorage:', workingLists);
+            } catch (error) {
+              console.error('❌ Error parsing trello-real-data:', error);
+            }
+          }
+          
+          // If still no lists, use fallback
+          if (!workingLists || workingLists.length === 0) {
+            console.log('⚠️ Still no lists, using fallback...');
+            workingLists = [
+              { id: 'todo', name: 'To Do', closed: false },
+              { id: 'doing', name: 'Doing', closed: false },
+              { id: 'done', name: 'Done', closed: false }
+            ];
+          }
+        }
+        
         // Use existing function to get real lists
         if (typeof refreshRealListsIfPossible === 'function') {
           refreshRealListsIfPossible();
         }
         
-        // Wait a bit for lists to load, then populate
+        // Populate immediately and also after delay
+        populateUnifiedListsDisplay();
+        
         setTimeout(() => {
           console.log('⏰ Delayed population - workingLists:', workingLists);
           populateUnifiedListsDisplay();
-        }, 500);
+        }, 1000);
+      }
+      
+      // Force refresh lists function
+      function forceRefreshLists() {
+        console.log('🔄 Force refreshing lists...');
+        
+        // Try to get current board ID
+        const boardId = localStorage.getItem('current-trello-board-id') || '68acf054e933885b63ca3876';
+        
+        // Try to get Trello token
+        const connectionData = localStorage.getItem('linkloom-connection');
+        let token = null;
+        if (connectionData) {
+          try {
+            const connection = JSON.parse(connectionData);
+            token = connection.trelloToken;
+          } catch (error) {
+            console.error('❌ Error parsing connection data:', error);
+          }
+        }
+        
+        if (token) {
+          console.log('🔑 Using stored token to fetch lists...');
+          fetch(`https://api.trello.com/1/boards/${boardId}/lists?key=${TRELLO_API_KEY}&token=${token}`)
+            .then(response => response.json())
+            .then(lists => {
+              console.log('✅ Fetched lists from Trello API:', lists);
+              workingLists = lists.filter(list => !list.closed);
+              populateUnifiedListsDisplay();
+            })
+            .catch(error => {
+              console.error('❌ Error fetching lists:', error);
+              // Use fallback lists
+              workingLists = [
+                { id: 'todo', name: 'To Do', closed: false },
+                { id: 'doing', name: 'Doing', closed: false },
+                { id: 'done', name: 'Done', closed: false }
+              ];
+              populateUnifiedListsDisplay();
+            });
+        } else {
+          console.log('⚠️ No token, using fallback lists');
+          workingLists = [
+            { id: 'todo', name: 'To Do', closed: false },
+            { id: 'doing', name: 'Doing', closed: false },
+            { id: 'done', name: 'Done', closed: false }
+          ];
+          populateUnifiedListsDisplay();
+        }
       }
       
       function populateUnifiedListsDisplay() {
