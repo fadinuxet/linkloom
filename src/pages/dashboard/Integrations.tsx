@@ -37,22 +37,32 @@ export default function Integrations() {
   // Check for existing Trello integration on component mount
   useEffect(() => {
     checkTrelloIntegration()
+    
+    // Add global function for debugging
+    ;(window as any).refreshLinkLoomIntegration = checkTrelloIntegration
+    console.log('🔧 Debug: Use refreshLinkLoomIntegration() in console to manually refresh')
   }, [])
 
   const checkTrelloIntegration = async () => {
+    console.log('🔄 Checking Trello integration...')
+    setTrelloIntegration(prev => ({ ...prev, isLoading: true }))
     try {
       // First try to get data from Supabase (real-time connection)
+      console.log('📡 Fetching from Supabase...')
       const { data: links, error } = await supabase
         .from('links')
         .select('trello_card_id, metadata')
         .limit(1)
       
       if (error) {
-        console.error('Error fetching from Supabase:', error)
+        console.error('❌ Error fetching from Supabase:', error)
+      } else {
+        console.log('✅ Supabase response:', links)
       }
       
       // Check if we have any Trello cards in the database
       if (links && links.length > 0) {
+        console.log('🎯 Found Trello data in database')
         // We have Trello data, so Power-Up is connected
         const firstLink = links[0]
         const metadata = firstLink.metadata || {}
@@ -65,6 +75,7 @@ export default function Integrations() {
           status: "active",
           isLoading: false
         })
+        console.log('✅ Set integration as connected')
         return
       }
       
@@ -449,11 +460,19 @@ export default function Integrations() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={checkTrelloIntegration}
+                onClick={() => {
+                  console.log('🔄 Refresh button clicked')
+                  checkTrelloIntegration()
+                }}
                 className="border-blue-300 text-blue-700"
+                disabled={trelloIntegration.isLoading}
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh Status
+                {trelloIntegration.isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                {trelloIntegration.isLoading ? 'Refreshing...' : 'Refresh Status'}
               </Button>
             </div>
           ) : (
