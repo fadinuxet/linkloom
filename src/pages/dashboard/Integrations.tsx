@@ -46,120 +46,86 @@ export default function Integrations() {
   const checkTrelloIntegration = async () => {
     console.log('🔄 Checking Trello integration...')
     setTrelloIntegration(prev => ({ ...prev, isLoading: true }))
+    
     try {
-      // First try to get data from Supabase (real-time connection)
       console.log('📡 Fetching from Supabase...')
-      const { data: links, error } = await supabase
-        .from('links')
-        .select('trello_card_id, metadata, created_at, updated_at')
-        .limit(1)
       
-      if (error) {
-        console.error('❌ Error fetching from Supabase:', error)
-      } else {
-        console.log('✅ Supabase response:', links)
-      }
+      // Check Trello connection status from the trello_connections table
+      const { data: connections, error: connectionError } = await supabase
+        .from('trello_connections')
+        .select('*')
+        .eq('user_id', 'test-user') // We'll need to get this from auth context
+        .eq('is_active', true)
+        .maybeSingle()
       
-      // Check if we have any Trello cards in the database
-      if (links && links.length > 0) {
-        console.log('🎯 Found Trello data in database:', links)
-        // We have Trello data, but let's verify it's actually from a connected Power-Up
-        const firstLink = links[0]
-        const metadata = firstLink.metadata || {}
-        
-        console.log('🔍 First link details:', {
-          trello_card_id: firstLink.trello_card_id,
-          metadata: metadata,
-          created_at: firstLink.created_at,
-          updated_at: firstLink.updated_at
-        })
-        
-        // Check if this is recent data (within last 24 hours) or old test data
-        const linkDate = new Date(firstLink.created_at || firstLink.updated_at || Date.now())
-        const now = new Date()
-        const hoursDiff = (now.getTime() - linkDate.getTime()) / (1000 * 60 * 60)
-        
-        console.log('📅 Link age:', hoursDiff.toFixed(1), 'hours old')
-        console.log('📅 Link date:', linkDate.toISOString())
-        console.log('📅 Current time:', now.toISOString())
-        
-        if (hoursDiff > 24) {
-          console.log('⚠️ Data is old (>24h), likely test data. Power-Up not connected.')
-          setTrelloIntegration({
-            isConnected: false,
-            boardName: "",
-            listName: "",
-            lastSync: "Old test data found",
-            status: "disconnected",
-            isLoading: false
-          })
-          return
-        }
-        
-        // Data is recent, so Power-Up is likely connected
-        setTrelloIntegration({
-          isConnected: true,
-          boardName: metadata.trello_board_name || "Trello Board",
-          listName: metadata.trello_list_name || "Multiple Lists",
-          lastSync: "Connected via Power-Up",
-          status: "active",
-          isLoading: false
-        })
-        console.log('✅ Set integration as connected (recent data)')
-        return
-      }
-      
-      // Fallback: Check localStorage (for development/testing)
-      const connectionData = localStorage.getItem('linkloom-connection')
-      const trelloData = localStorage.getItem('trello-real-data')
-      
-      if (connectionData && trelloData) {
-        try {
-          const connection = JSON.parse(connectionData)
-          const trello = JSON.parse(trelloData)
-          
-          const listConnections = connection.listConnections || []
-          const connectedLists = listConnections.map((conn: any) => conn.listName).join(', ')
-          
-          setTrelloIntegration({
-            isConnected: true,
-            boardName: trello.boardName || connection.boardName || "Content Calendar",
-            listName: connectedLists || "Multiple Lists",
-            lastSync: "Connected via Power-Up (Local)",
-            status: "active",
-            isLoading: false
-          })
-        } catch (parseError) {
-          console.error('Error parsing Power-Up data:', parseError)
-          setTrelloIntegration({
-            isConnected: false,
-            boardName: "",
-            listName: "",
-            lastSync: "",
-            status: "disconnected",
-            isLoading: false
-          })
-        }
-      } else {
+      if (connectionError) {
+        console.error('❌ Error fetching connection status:', connectionError)
         setTrelloIntegration({
           isConnected: false,
           boardName: "",
           listName: "",
-          lastSync: "",
-          status: "disconnected",
+          lastSync: "Error checking status",
+          status: "error",
           isLoading: false
         })
+        return
       }
-    } catch (error) {
-      console.error('Error checking Trello integration:', error)
+      
+      if (connections) {
+        console.log('✅ Found active Trello connection:', connections)
+        const connectedDate = new Date(connections.connected_at)
+        const timeAgo = getTimeAgo(connectedDate)
+        
+        setTrelloIntegration({
+          isConnected: true,
+          boardName: connections.board_name,
+          listName: "Connected via Power-Up",
+          lastSync: `Connected ${timeAgo}`,
+          status: "active",
+          isLoading: false
+        })
+        return
+      }
+      
+      // No active connection found
+      console.log('❌ No active Trello connection found')
       setTrelloIntegration({
         isConnected: false,
         boardName: "",
         listName: "",
-        lastSync: "",
+        lastSync: "Not connected",
         status: "disconnected",
         isLoading: false
       })
+      
+    } catch (error) {
+      console.error('❌ Error checking Trello integration:', error)
+      setTrelloIntegration({
+        isConnected: false,
+        boardName: "",
+        listName: "",
+        lastSync: "Error checking status",
+        status: "error",
+        isLoading: false
+      })
+    } finally {
+      setTrelloIntegration(prev => ({ ...prev, isLoading: false }))
+    }
+  }
+
+  // Helper function to format time ago
+  const getTimeAgo = (date: Date) => {
+    const now = new Date()
+    const diffInMs = now.getTime() - date.getTime()
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+    
+    if (diffInDays > 0) {
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`
+    } else if (diffInHours > 0) {
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`
+    } else {
+      return 'Just now'
     }
   }
 
@@ -560,49 +526,7 @@ export default function Integrations() {
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Check Database
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={async () => {
-                  console.log('🔍 Checking ALL data in database...')
-                  const { data: allLinks, error } = await supabase
-                    .from('links')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                  
-                  if (error) {
-                    console.error('❌ Error fetching all data:', error)
-                  } else {
-                    console.log('📊 All database data:', allLinks)
-                    console.log('📊 Total links found:', allLinks?.length || 0)
-                  }
-                }}
-                className="border-blue-300 text-blue-700 ml-2"
-              >
-                🔍 Show All Data
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={async () => {
-                  if (confirm('Clear all old test data from database? This will reset the integration status.')) {
-                    console.log('🗑️ Clearing old test data...')
-                    const { error } = await supabase
-                      .from('links')
-                      .delete()
-                      .neq('trello_card_id', '')
-                    if (error) {
-                      console.error('❌ Error clearing data:', error)
-                    } else {
-                      console.log('✅ Old test data cleared')
-                      checkTrelloIntegration()
-                    }
-                  }
-                }}
-                className="border-red-300 text-red-700 ml-2"
-              >
-                🗑️ Clear Test Data
-              </Button>
+
             </div>
           </CardContent>
         </Card>
