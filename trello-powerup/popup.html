@@ -297,11 +297,8 @@
           <button class="btn" onclick="syncAgain()" style="width: 100%; background: #28a745; margin-bottom: 10px;">
             🔄 Sync Now
           </button>
-          <button class="btn" onclick="disconnectAndReconnect()" style="width: 100%; background: #dc3545; margin-bottom: 10px;">
+          <button class="btn" onclick="disconnectAndReconnect()" style="width: 100%; background: #dc3545;">
             Disconnect
-          </button>
-          <button class="btn" onclick="autoRestoreConnection()" style="width: 100%; background: #17a2b8;">
-            🔗 Reconnect to Previous
           </button>
         </div>
       </div>
@@ -1230,12 +1227,47 @@
           document.getElementById('connectionForm').classList.remove('hidden');
           document.getElementById('status').classList.remove('hidden');
           
-          // Show reconnection message with manual reconnect option
-          showStatus('Connection hidden. Your lists are preserved. Click "Reconnect" to restore.', 'info');
+          // Show reconnection message
+          showStatus('Connection hidden. Your lists are preserved. Connect again to restore.', 'info');
+          
+          // Auto-restore previous connection when form is shown
+          autoRestoreOnConnectionForm();
           
         } catch (error) {
           console.error('Error hiding connection:', error);
         }
+      }
+      
+      function autoRestoreOnConnectionForm() {
+        // This function is called when the connection form is shown
+        // It automatically checks for and restores previous connections
+        setTimeout(() => {
+          const connectionData = localStorage.getItem('linkloom-connection');
+          if (connectionData) {
+            try {
+              const connection = JSON.parse(connectionData);
+              if (connection.listConnections && connection.listConnections.length > 0) {
+                console.log('🔄 Auto-restoring previous connection with', connection.listConnections.length, 'lists');
+                
+                // Hide connection form and show connected view
+                document.getElementById('connectionForm').classList.add('hidden');
+                document.getElementById('status').classList.add('hidden');
+                document.getElementById('alreadyConnected').classList.remove('hidden');
+                
+                // Update connection details and populate lists
+                updateConnectionDetails();
+                populateListConnections();
+                
+                // Refresh real lists with stored token
+                refreshRealListsIfPossible();
+                
+                showStatus('Previous connection restored! All your lists are back.', 'success');
+              }
+            } catch (error) {
+              console.error('Error auto-restoring connection:', error);
+            }
+          }
+        }, 100);
       }
       
       function autoRestoreConnection() {
