@@ -212,43 +212,43 @@
       /* Purple header section */
       .header {
         background: linear-gradient(135deg, #6633CC 0%, #7C3AED 100%);
-        padding: 24px 20px;
+        padding: 16px 20px;
         text-align: center;
         position: relative;
       }
       
       .header .logo {
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
         background: rgba(255, 255, 255, 0.2);
         border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 16px;
-        font-size: 28px;
+        margin: 0 auto 12px;
+        font-size: 24px;
         font-weight: bold;
         color: white;
       }
       
       .header .title {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 700;
         color: white;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
       
       .header .subtitle {
-        font-size: 16px;
+        font-size: 14px;
         color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 24px;
+        margin-bottom: 16px;
       }
       
       /* Header action buttons */
       .header-actions {
         display: flex;
-        gap: 12px;
+        gap: 8px;
         justify-content: center;
       }
       
@@ -256,9 +256,9 @@
         background: rgba(255, 255, 255, 0.15);
         border: 1px solid rgba(255, 255, 255, 0.2);
         color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -273,7 +273,7 @@
       /* Main content area */
       .main-content {
         background: #1A1A1A;
-        padding: 24px 20px;
+        padding: 16px 20px;
       }
       
       /* Section header */
@@ -281,29 +281,29 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
       }
       
       .section-title {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
         color: white;
       }
       
       .status-indicator {
-        font-size: 14px;
+        font-size: 12px;
         color: #9CA3AF;
         background: #262626;
-        padding: 6px 12px;
-        border-radius: 20px;
+        padding: 4px 10px;
+        border-radius: 16px;
       }
       
       /* List cards */
       .list-card {
         background: #262626;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 16px;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -313,37 +313,37 @@
       
       .list-card:hover {
         border-color: #6633CC;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 51, 204, 0.15);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(102, 51, 204, 0.15);
       }
       
       .list-info {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
         flex: 1;
       }
       
       .list-icon {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         background: #404040;
-        border-radius: 8px;
+        border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 14px;
       }
       
       .list-details h4 {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 600;
         color: white;
-        margin: 0 0 4px 0;
+        margin: 0 0 2px 0;
       }
       
       .list-details p {
-        font-size: 14px;
+        font-size: 12px;
         color: #9CA3AF;
         margin: 0;
       }
@@ -471,11 +471,7 @@
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <div class="logo">L</div>
-        <div class="title">Connect LinkLoom</div>
-        <div class="subtitle">Automatically sync your Trello content to your bio page</div>
-      </div>
+      <!-- Old header removed - using new unified interface instead -->
 
       <!-- Connection Form -->
       <div id="connectionForm">
@@ -2005,13 +2001,19 @@
       }
       
       function loadRealListsForUnifiedUI() {
+        console.log('🔄 Loading real lists for unified UI...');
+        console.log('🔍 Current workingLists:', workingLists);
+        
         // Use existing function to get real lists
         if (typeof refreshRealListsIfPossible === 'function') {
           refreshRealListsIfPossible();
         }
         
-        // Populate the unified lists display
-        populateUnifiedListsDisplay();
+        // Wait a bit for lists to load, then populate
+        setTimeout(() => {
+          console.log('⏰ Delayed population - workingLists:', workingLists);
+          populateUnifiedListsDisplay();
+        }, 500);
       }
       
       function populateUnifiedListsDisplay() {
