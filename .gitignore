@@ -46,3 +46,16 @@ coverage/
 *.tmp
 *.temp
 node_modules
+
+# --- secrets: never commit env files (enforced) ---
+.env
+.env.*
+*.env
+!.env.example
+!*.env.example
+.dev.vars
+*.dev.vars
+.env.save
+.env.backup
+.env.local.bak
+*.env.bak
